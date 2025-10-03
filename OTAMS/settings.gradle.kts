@@ -20,4 +20,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "OTAMS"
-include ':app'
+include(":app")
+ 
