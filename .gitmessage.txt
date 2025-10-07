@@ -1,0 +1,50 @@
+# ==========================================================
+# 🧩 Commit Message Template — uOttawa SEG Project
+# ==========================================================
+# Authored by Chat-GPT
+# Format your commit messages as follows:
+#
+# <type>(<scope>): <short summary>
+#
+# Example:
+#   feat(auth): add login validation
+#   fix(ui): correct button alignment on mobile
+#   docs(readme): update setup instructions
+#
+# ----------------------------------------------------------
+# Common Types:
+#   feat     → New feature
+#   fix      → Bug fix
+#   docs     → Documentation only changes
+#   style    → Code style changes (no logic impact)
+#   refactor → Code restructuring (no new feature/fix)
+#   test     → Adding or modifying tests
+#   chore    → Build, CI, dependencies, etc.
+#
+# ----------------------------------------------------------
+# Example Full Commit:
+#
+#   feat(api): implement new /users endpoint
+#
+#   - Added route and controller
+#   - Integrated request validation middleware
+#   - Updated API docs
+#
+#   Closes #42
+#
+# ----------------------------------------------------------
+# Notes:
+# - The first line should be ≤ 72 characters
+# - Leave one blank line between title and body
+# - Use the imperative mood (e.g., “add” not “added”)
+# - Reference issue numbers at the end when relevant
+# ==========================================================
+
+# <type>(<scope>): <short summary>
+
+# (Write details below, if needed)
+#
+# - 
+# - 
+#
+# Closes #

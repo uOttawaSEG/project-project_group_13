@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# -------------------------------------------------------
+# 🚫 Pre-push hook — prevents pushing to protected branches
+# Works cross-platform (macOS, Linux, Git Bash on Windows)
+# -------------------------------------------------------
+
+branch="$(git rev-parse --abbrev-ref HEAD)"
+
+# ANSI color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+  echo ""
+  echo -e "${RED}${BOLD}🚫  Push blocked!${RESET}"
+  echo -e "${YELLOW}-----------------${RESET}"
+  echo -e "You are trying to push directly to '${CYAN}$branch${RESET}'."
+  echo -e "This branch is ${BOLD}protected${RESET} to prevent accidental overwrites."
+  echo ""
+  echo -e "${RED}🥺🥺🥺🥺${RESET}  ${YELLOW}Please create a new branch and push that instead${RESET}"
+  echo ""
+  echo -e "${GREEN}   git checkout -b ${CYAN}my-update${RESET}"
+  echo -e "${GREEN}   git push origin ${CYAN}my-update${RESET}"
+  echo ""
+  echo -e "${BOLD}Don't Forget to open a PULL REQUEST!${RESET}"
+  echo ""
+  exit 1
+fi
