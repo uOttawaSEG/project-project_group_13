@@ -5,7 +5,7 @@
 [Notion](https://www.notion.so/282acd4b601980e8b357e8b793a7569c?source=copy_link)
 
 **Group Members (Name, Student Number):**
-1. Douaa Achiai, 
+1. Douaa Achiai, 300434035
 2. Safa Diab, 
 3. Yassin Shaker, 300215115
 4. Joe Thozhuthumparambil, 300392276 
