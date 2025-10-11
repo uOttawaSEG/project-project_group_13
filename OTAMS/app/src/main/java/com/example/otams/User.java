@@ -23,10 +23,10 @@ class Admin extends User {
     }
 
     public void accept() {
-        System.out.println("Admin " + username + " a accepté la demande.");
+        System.out.println("Admin " + username + " request accepted.");
     }
 
     public void reject() {
-        System.out.println("Admin " + username + " a rejeté la demande.");
+        System.out.println("Admin " + username + " request rejected.");
     }
 }
