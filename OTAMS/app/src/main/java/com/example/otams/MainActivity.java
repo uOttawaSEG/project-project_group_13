@@ -15,6 +15,7 @@ import com.example.otams.databinding.FragmentLoginBinding;
 
 public class MainActivity extends AppCompatActivity {
 
+
     private FragmentLoginBinding binding;
 
     @Override
