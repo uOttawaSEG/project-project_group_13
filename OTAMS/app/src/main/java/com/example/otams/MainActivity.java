@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         start();
     }
 
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         binding = null;
