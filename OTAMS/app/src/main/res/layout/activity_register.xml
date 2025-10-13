@@ -61,12 +61,11 @@
         android:id="@+id/registerSpinner"
         android:layout_width="307dp"
         android:layout_height="58dp"
-        android:spinnerMode="dropdown"
         android:entries="@array/roles"
         android:prompt="@string/role_selection"
-        tools:layout_editor_absoluteX="63dp"
-        tools:layout_editor_absoluteY="67dp"
-        />
+        android:spinnerMode="dropdown"
+        tools:layout_editor_absoluteX="54dp"
+        tools:layout_editor_absoluteY="70dp" />
 
     <TextView
         android:id="@+id/registerPhoneNumberTV"
