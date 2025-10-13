@@ -59,12 +59,12 @@ public class LoginViewModel extends ViewModel {
         if (username.contains("@")) {
             return Patterns.EMAIL_ADDRESS.matcher(username).matches();
         } else {
-            return !username.trim().isEmpty();
+            return false;
         }
     }
 
     // A placeholder password validation check
     private boolean isPasswordValid(String password) {
-        return password != null && password.trim().length() > 5;
+        return password != null && password.trim().length() > 8;
     }
 }
