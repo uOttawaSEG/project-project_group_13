@@ -37,7 +37,7 @@
 
 **Group Members (Name, Student Number):**
 1. Douaa Achiai, 300434035
-2. Safa Diab,
+2. Safa Diab, 300326924
 3. Ziad Tariq, 300443993
 4. Yassin Shaker, 300215115
 5. Joe Thozhuthumparambil, 300392276 
