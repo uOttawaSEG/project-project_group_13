@@ -42,3 +42,8 @@
 4. Yassin Shaker, 300215115
 5. Joe Thozhuthumparambil, 300392276 
 6. Mani Masteali, 300428049
+
+
+<p align="center">
+  <sub><sup>Made with ❤️ using ChatGPT, Gemini and caffeine ☕</sup></sub>
+</p>
