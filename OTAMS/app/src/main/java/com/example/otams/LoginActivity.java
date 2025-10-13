@@ -4,7 +4,7 @@ import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends MainActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
