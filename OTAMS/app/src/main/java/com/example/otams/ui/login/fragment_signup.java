@@ -1,4 +1,4 @@
-package com.example.otams;
+package com.example.otams.ui.login;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.otams.R;
 import com.google.android.material.appbar.MaterialToolbar;
 
 public class fragment_signup extends Fragment {
