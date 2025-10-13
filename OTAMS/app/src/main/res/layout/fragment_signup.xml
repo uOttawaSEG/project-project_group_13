@@ -144,14 +144,16 @@
             android:id="@+id/courses_offered"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_courses_offered" />
+            android:hint="@string/hint_courses_offered"
+            android:minHeight="48dp" />
 
         <EditText
             android:id="@+id/highest_degree"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="@string/hint_highest_degree" />
+            android:hint="@string/hint_highest_degree"
+            android:minHeight="48dp" />
     </LinearLayout>
 
     <!-- Register Button -->
