@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 validateUsername();
-                updateButtonState();
             }
 
             @Override
@@ -96,10 +95,11 @@ public class MainActivity extends AppCompatActivity {
             binding.username.setError(null);
             return;
         }
-        if (!isValidUsername(u)) {
-            binding.username.setError("Invalid username");
-        } else {
+        if (isValidUsername(u)) {
             binding.username.setError(null);
+        } else {
+
+            binding.username.setError("Invalid username");
         }
     }
 
@@ -109,10 +109,10 @@ public class MainActivity extends AppCompatActivity {
             binding.password.setError(null);
             return;
         }
-        if (!isValidPassword(p)) {
-            binding.password.setError("Password must be at least 8 characters long");
-        } else {
+        if (isValidPassword(p)) {
             binding.password.setError(null);
+        } else {
+            binding.password.setError("Password must be at least 8 characters long");
         }
     }
 
