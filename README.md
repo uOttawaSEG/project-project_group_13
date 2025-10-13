@@ -6,8 +6,8 @@
 |:--------|:--------|
 | **Build Status** | [![Build](https://github.com/uOttawaSEG/project-project_group_13/actions/workflows/gradle.yml/badge.svg)](https://github.com/uOttawaSEG/project-project_group_13/actions/workflows/gradle.yml) |
 | **Latest Release** | [![Release](https://img.shields.io/github/v/release/uOttawaSEG/project-project_group_13)](https://github.com/uOttawaSEG/project-project_group_13/releases/latest) |
-| **Last Commit** | ![Last Commit](https://img.shields.io/github/last-commit/uOttawaSEG/project-project_group_13) |
-| **Contributors** | ![Contributors](https://img.shields.io/github/contributors/uOttawaSEG/project-project_group_13) |
+| **Last Commit** | [![Last Commit](https://img.shields.io/github/last-commit/uOttawaSEG/project-project_group_13)](https://github.com/uOttawaSEG/project-project_group_13/commits/main/) |
+| **Contributors** | [![Contributors](https://img.shields.io/github/contributors/uOttawaSEG/project-project_group_13)](https://github.com/uOttawaSEG/project-project_group_13/graphs/contributors) |
 
 ### Folder Structure
 
