@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -82,6 +84,8 @@ public class LoginFragment extends Fragment {
                 loadingProgressBar.setVisibility(View.GONE);
                 if (loginResult.getError() != null) {
                     showLoginFailed(loginResult.getError());
+                    NavController navController = Navigation.findNavController(view);
+                    navController.navigate(R.id.action_loginFragment_to_fragment_signup);
                 }
                 if (loginResult.getSuccess() != null) {
                     updateUiWithUser(loginResult.getSuccess());
