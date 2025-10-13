@@ -1,13 +1,5 @@
 package com.example.otams.ui.login;
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.fragment.app.Fragment;
-
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,10 +14,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.otams.MainActivity;
-import com.example.otams.databinding.FragmentLoginBinding;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.example.otams.R;
+import com.example.otams.databinding.FragmentLoginBinding;
 
 public class LoginFragment extends Fragment {
 
@@ -81,11 +80,22 @@ public class LoginFragment extends Fragment {
                 }
                 loadingProgressBar.setVisibility(View.GONE);
                 if (loginResult.getError() != null) {
+
+                    String username = usernameEditText.getText().toString();
+                    String password = passwordEditText.getText().toString();
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString("username", username);
+                    bundle.putString("password", password);
+
                     showLoginFailed(loginResult.getError());
+                    NavController navController = Navigation.findNavController(view);
+                    navController.navigate(R.id.action_loginFragment_to_fragment_signup, bundle);
                 }
                 if (loginResult.getSuccess() != null) {
                     updateUiWithUser(loginResult.getSuccess());
                 }
+                loginViewModel.clearLoginResult();
             }
         });
 
