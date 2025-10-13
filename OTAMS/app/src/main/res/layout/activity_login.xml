@@ -71,6 +71,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Don't have an account? Register here"
+        android:visibility="visible"
         tools:layout_editor_absoluteX="91dp"
         tools:layout_editor_absoluteY="431dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
