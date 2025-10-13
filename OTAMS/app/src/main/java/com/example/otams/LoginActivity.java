@@ -4,11 +4,12 @@ import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class LoginActivity extends MainActivity {
+public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +20,11 @@ public class LoginActivity extends MainActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+        // when the user clicks the register here text, the code switches to register activity
+        findViewById(R.id.askToRegisterTextView).setOnClickListener(v-> {
+            Intent intent =  new Intent(LoginActivity.this,RegisterActivity.class);
+            startActivity(intent);
         });
     }
 }
