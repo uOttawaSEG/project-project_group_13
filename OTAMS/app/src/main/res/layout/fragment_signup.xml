@@ -12,13 +12,26 @@
     android:paddingBottom="@dimen/fragment_vertical_margin"
     tools:context=".fragment_signup">
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        app:titleTextColor="@android:color/white"
+        app:popupTheme="@style/ThemeOverlay.Material3.Light"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+
     <!-- Role Selection -->
     <RadioGroup
         android:id="@+id/role_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
