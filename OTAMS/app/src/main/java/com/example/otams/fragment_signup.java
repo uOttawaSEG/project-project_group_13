@@ -1,84 +1,64 @@
 package com.example.otams;
 
 import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RadioGroup;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
-
-import com.google.android.material.appbar.MaterialToolbar;
-
+/**
+ * A simple {@link Fragment} subclass.
+ * Use the {@link fragment_signup#newInstance} factory method to
+ * create an instance of this fragment.
+ */
 public class fragment_signup extends Fragment {
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_signup, container, false);
+    // TODO: Rename parameter arguments, choose names that match
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
+
+    // TODO: Rename and change types of parameters
+    private String mParam1;
+    private String mParam2;
+
+    public fragment_signup() {
+        // Required empty public constructor
+    }
+
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @param param1 Parameter 1.
+     * @param param2 Parameter 2.
+     * @return A new instance of fragment fragment_signup.
+     */
+    // TODO: Rename and change types and number of parameters
+    public static fragment_signup newInstance(String param1, String param2) {
+        fragment_signup fragment = new fragment_signup();
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_PARAM2, param2);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
-        toolbar.setTitle("Register"); // Set your title
-
-        // Tell Android this toolbar should act as the ActionBar
-        AppCompatActivity activity = (AppCompatActivity) requireActivity();
-        activity.setSupportActionBar(toolbar);
-
-        // Enable back (Up) button
-        if (activity.getSupportActionBar() != null) {
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            activity.getSupportActionBar().setDisplayShowHomeEnabled(true);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam2 = getArguments().getString(ARG_PARAM2);
         }
+    }
 
-        // Handle back navigation manually
-        toolbar.setNavigationOnClickListener(v ->
-                NavHostFragment.findNavController(this).navigateUp());
-
-
-        RadioGroup roleGroup = view.findViewById(R.id.role_group);
-        LinearLayout studentFields = view.findViewById(R.id.student_fields);
-        LinearLayout tutorFields = view.findViewById(R.id.tutor_fields);
-
-        // Default state: Student selected
-        studentFields.setVisibility(View.VISIBLE);
-        tutorFields.setVisibility(View.GONE);
-
-        // Listen for role selection changes
-        roleGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.radio_student) {
-                studentFields.setVisibility(View.VISIBLE);
-                tutorFields.setVisibility(View.GONE);
-            } else if (checkedId == R.id.radio_tutor) {
-                studentFields.setVisibility(View.GONE);
-                tutorFields.setVisibility(View.VISIBLE);
-            }
-        });
-
-        EditText signupUsername = view.findViewById(R.id.email);
-        EditText signupPassword = view.findViewById(R.id.password);
-
-        Bundle args = getArguments();
-        if (args != null) {
-            String username = args.getString("username");
-            String password = args.getString("password");
-
-            if (username != null) signupUsername.setText(username);
-            if (password != null) signupPassword.setText(password);
-        }
-
-
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_signup, container, false);
     }
 }
