@@ -13,8 +13,8 @@
         android:layout_height="30dp"
         android:text="Already have an account? Login"
         android:visibility="visible"
-        tools:layout_editor_absoluteX="97dp"
-        tools:layout_editor_absoluteY="596dp"
+        tools:layout_editor_absoluteX="75dp"
+        tools:layout_editor_absoluteY="503dp"
         tools:visibility="visible" />
 
     <TextView
@@ -22,38 +22,158 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Register"
-        tools:layout_editor_absoluteX="153dp"
-        tools:layout_editor_absoluteY="117dp" />
+        tools:layout_editor_absoluteX="190dp"
+        tools:layout_editor_absoluteY="30dp" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/registerFirstNameTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
+        android:text="First Name"
         tools:layout_editor_absoluteX="53dp"
         tools:layout_editor_absoluteY="150dp" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/registerLastNameTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="49dp"
-        tools:layout_editor_absoluteY="205dp" />
+        android:text="Last Name"
+        tools:layout_editor_absoluteX="53dp"
+        tools:layout_editor_absoluteY="187dp" />
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/registerEmailTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="48dp"
-        tools:layout_editor_absoluteY="252dp" />
+        android:text="Email"
+        tools:layout_editor_absoluteX="53dp"
+        tools:layout_editor_absoluteY="219dp" />
 
     <TextView
-        android:id="@+id/textView7"
+        android:id="@+id/registerPasswordTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="48dp"
-        tools:layout_editor_absoluteY="298dp" />
+        android:text="Password"
+        tools:layout_editor_absoluteX="53dp"
+        tools:layout_editor_absoluteY="247dp" />
+
+    <Spinner
+        android:id="@+id/registerSpinner"
+        android:layout_width="307dp"
+        android:layout_height="58dp"
+        android:spinnerMode="dropdown"
+        tools:layout_editor_absoluteX="63dp"
+        tools:layout_editor_absoluteY="67dp" />
+
+    <TextView
+        android:id="@+id/registerPhoneNumberTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Phone Number"
+        tools:layout_editor_absoluteX="53dp"
+        tools:layout_editor_absoluteY="277dp" />
+
+    <TextView
+        android:id="@+id/registerProgramOfStudyTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Program of Study"
+        tools:layout_editor_absoluteX="54dp"
+        tools:layout_editor_absoluteY="306dp" />
+
+    <TextView
+        android:id="@+id/registerHighestDegreeTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Highest Degree"
+        tools:layout_editor_absoluteX="55dp"
+        tools:layout_editor_absoluteY="333dp" />
+
+    <TextView
+        android:id="@+id/registeredCoursesOfferedTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Courses Offered"
+        tools:layout_editor_absoluteX="57dp"
+        tools:layout_editor_absoluteY="364dp" />
+
+    <Button
+        android:id="@+id/registerButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Register"
+        tools:layout_editor_absoluteX="141dp"
+        tools:layout_editor_absoluteY="410dp" />
+
+    <EditText
+        android:id="@+id/firstNameEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        tools:layout_editor_absoluteX="145dp"
+        tools:layout_editor_absoluteY="128dp" />
+
+    <EditText
+        android:id="@+id/editTextText2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        tools:layout_editor_absoluteX="145dp"
+        tools:layout_editor_absoluteY="166dp" />
+
+    <EditText
+        android:id="@+id/emailEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textEmailAddress"
+        tools:layout_editor_absoluteX="145dp"
+        tools:layout_editor_absoluteY="201dp" />
+
+    <EditText
+        android:id="@+id/passwordEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPassword"
+        tools:layout_editor_absoluteX="143dp"
+        tools:layout_editor_absoluteY="228dp" />
+
+    <EditText
+        android:id="@+id/phoneNumberEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="number"
+        tools:layout_editor_absoluteX="152dp"
+        tools:layout_editor_absoluteY="258dp" />
+
+    <EditText
+        android:id="@+id/programOfStudyEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        tools:layout_editor_absoluteX="165dp"
+        tools:layout_editor_absoluteY="289dp" />
+
+    <EditText
+        android:id="@+id/highestDegreeEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        tools:layout_editor_absoluteX="163dp"
+        tools:layout_editor_absoluteY="319dp" />
+
+    <EditText
+        android:id="@+id/coursesOfferedEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        tools:layout_editor_absoluteX="167dp"
+        tools:layout_editor_absoluteY="349dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
