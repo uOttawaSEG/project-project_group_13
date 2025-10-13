@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.otams.MainActivity;
 import com.example.otams.databinding.FragmentLoginBinding;
 
 import com.example.otams.R;
@@ -51,6 +53,9 @@ public class LoginFragment extends Fragment {
         final EditText passwordEditText = binding.password;
         final Button loginButton = binding.login;
         final ProgressBar loadingProgressBar = binding.loading;
+
+        // Initially hide spinner
+        loadingProgressBar.setVisibility(View.GONE);
 
         loginViewModel.getLoginFormState().observe(getViewLifecycleOwner(), new Observer<LoginFormState>() {
             @Override
@@ -131,6 +136,11 @@ public class LoginFragment extends Fragment {
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
         }
+
+        //todo this will be our main page
+
+//        startActivity(new Intent(getContext(), MainActivity.class));
+//        requireActivity().finish();
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {
