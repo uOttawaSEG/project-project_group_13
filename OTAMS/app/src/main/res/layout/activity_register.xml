@@ -8,30 +8,48 @@
     tools:context=".RegisterActivity">
 
     <TextView
-        android:id="@+id/LogintextView"
-        android:layout_width="260dp"
-        android:layout_height="30dp"
-        android:text="Already have an account? Login"
-        android:visibility="visible"
-        tools:layout_editor_absoluteX="75dp"
-        tools:layout_editor_absoluteY="503dp"
-        tools:visibility="visible" />
-
-    <TextView
         android:id="@+id/RegistertextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Register"
-        tools:layout_editor_absoluteX="190dp"
-        tools:layout_editor_absoluteY="30dp" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp" />
+
+    <Spinner
+        android:id="@+id/registerSpinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:entries="@array/roles"
+        android:prompt="@string/role_selection"
+        android:spinnerMode="dropdown"
+        app:layout_constraintTop_toTopOf="@id/RegistertextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="32dp"
+    />
 
     <TextView
         android:id="@+id/registerFirstNameTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="First Name"
-        tools:layout_editor_absoluteX="53dp"
-        tools:layout_editor_absoluteY="150dp" />
+        app:layout_constraintTop_toTopOf="@id/registerSpinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="32dp" />
+
+    <EditText
+        android:id="@+id/firstNameEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        tools:layout_editor_absoluteX="145dp"
+        tools:layout_editor_absoluteY="128dp" />
 
     <TextView
         android:id="@+id/registerLastNameTV"
@@ -56,16 +74,6 @@
         android:text="Password"
         tools:layout_editor_absoluteX="53dp"
         tools:layout_editor_absoluteY="247dp" />
-
-    <Spinner
-        android:id="@+id/registerSpinner"
-        android:layout_width="307dp"
-        android:layout_height="58dp"
-        android:entries="@array/roles"
-        android:prompt="@string/role_selection"
-        android:spinnerMode="dropdown"
-        tools:layout_editor_absoluteX="54dp"
-        tools:layout_editor_absoluteY="70dp" />
 
     <TextView
         android:id="@+id/registerPhoneNumberTV"
@@ -107,14 +115,6 @@
         tools:layout_editor_absoluteX="141dp"
         tools:layout_editor_absoluteY="410dp" />
 
-    <EditText
-        android:id="@+id/firstNameEditText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        tools:layout_editor_absoluteX="145dp"
-        tools:layout_editor_absoluteY="128dp" />
 
     <EditText
         android:id="@+id/editTextText2"
@@ -178,4 +178,13 @@
         android:inputType="text"
         tools:layout_editor_absoluteX="167dp"
         tools:layout_editor_absoluteY="349dp" />
+    <TextView
+        android:id="@+id/LogintextView"
+        android:layout_width="260dp"
+        android:layout_height="30dp"
+        android:text="Already have an account? Login"
+        android:visibility="visible"
+        tools:layout_editor_absoluteX="75dp"
+        tools:layout_editor_absoluteY="503dp"
+        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>
