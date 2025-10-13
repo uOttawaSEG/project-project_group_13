@@ -77,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // proceed with login
-
             binding.login.setEnabled(false);
             binding.login.setText(R.string.authenticating);
         });
