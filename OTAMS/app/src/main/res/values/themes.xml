@@ -8,11 +8,12 @@
     <style name="Theme.OTAMS" parent="Base.Theme.OTAMS" />
     <style name="CustomTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="boxStrokeColor">@color/teal_700</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
         <item name="hintTextColor">@color/gray_700</item>
         <item name="boxCornerRadiusTopStart">10dp</item>
         <item name="boxCornerRadiusTopEnd">10dp</item>
         <item name="boxCornerRadiusBottomStart">10dp</item>
         <item name="boxCornerRadiusBottomEnd">10dp</item>
-        <item name="boxStrokeWidthFocused">2dp</item>
     </style>
 </resources>
