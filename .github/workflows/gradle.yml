@@ -45,7 +45,7 @@ jobs:
       - name: Create google-services.json
         uses: jsdaniell/create-json@1.1.2
         with:
-          name: "app/google-services.json"
+          name: "OTAMS/app/google-services.json"
           json: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
       - name: Verify google-services.json exists
