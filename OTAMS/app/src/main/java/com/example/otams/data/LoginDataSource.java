@@ -1,30 +1,39 @@
 package com.example.otams.data;
 
+import androidx.annotation.NonNull;
+
 import com.example.otams.data.model.LoggedInUser;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
-/**
- * Class that handles authentication w/ login credentials and retrieves user information.
- */
 public class LoginDataSource {
 
-    public Result<LoggedInUser> login(String username, String password) {
+    private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-//        try {
-//            // TODO: handle loggedInUser authentication
-//            LoggedInUser fakeUser =
-//                    new LoggedInUser(
-//                            java.util.UUID.randomUUID().toString(),
-//                            "Jane Doe");
-//            return new Result.Success<>(fakeUser);
-//        } catch (Exception e) {
-//            return new Result.Error(new IOException("Error logging in", e));
+    public CompletableFuture<Result<LoggedInUser>> login(String username, String password) {
+        CompletableFuture<Result<LoggedInUser>> future = new CompletableFuture<>();
 
-        return new Result.Error(new IOException("Error logging in"));
+        mAuth.signInWithEmailAndPassword(username, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            LoggedInUser loggedInUser = new LoggedInUser(user.getUid(), user.getEmail());
+                            future.complete(new Result.Success<>(loggedInUser));
+                        } else {
+                            future.complete(new Result.Error(new Exception("User not found")));
+                        }
+                    } else {
+                        future.complete(new Result.Error(task.getException()));
+                    }
+                });
+
+        return future;
     }
 
     public void logout() {
-        // TODO: revoke authentication
+        mAuth.signOut();
     }
 }

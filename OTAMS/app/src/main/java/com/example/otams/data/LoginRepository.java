@@ -1,19 +1,16 @@
 package com.example.otams.data;
 
 import com.example.otams.data.model.LoggedInUser;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * Class that requests authentication and user information from the remote data source and
- * maintains an in-memory cache of login status and user credentials information.
+ * Repository that handles authentication and keeps an in-memory user cache.
  */
 public class LoginRepository {
 
     private static volatile LoginRepository instance;
+    private final LoginDataSource dataSource;
 
-    private LoginDataSource dataSource;
-
-    // If user credentials will be cached in local storage, it is recommended it be encrypted
-    // @see https://developer.android.com/training/articles/keystore
     private LoggedInUser user = null;
 
     // private constructor : singleton access
@@ -39,16 +36,23 @@ public class LoginRepository {
 
     private void setLoggedInUser(LoggedInUser user) {
         this.user = user;
-        // If user credentials will be cached in local storage, it is recommended it be encrypted
-        // @see https://developer.android.com/training/articles/keystore
     }
 
-    public Result<LoggedInUser> login(String username, String password) {
-        // handle login
-        Result<LoggedInUser> result = dataSource.login(username, password);
-        if (result instanceof Result.Success) {
-            setLoggedInUser(((Result.Success<LoggedInUser>) result).getData());
-        }
-        return result;
+    /**
+     * Performs Firebase login asynchronously.
+     */
+    public CompletableFuture<Result<LoggedInUser>> login(String username, String password) {
+        CompletableFuture<Result<LoggedInUser>> future = new CompletableFuture<>();
+
+        dataSource.login(username, password)
+                .thenAccept(result -> {
+                    if (result instanceof Result.Success) {
+                        LoggedInUser loggedInUser = ((Result.Success<LoggedInUser>) result).getData();
+                        setLoggedInUser(loggedInUser);
+                    }
+                    future.complete(result);
+                });
+
+        return future;
     }
 }

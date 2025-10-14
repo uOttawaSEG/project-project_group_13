@@ -79,21 +79,31 @@ public class LoginFragment extends Fragment {
                     return;
                 }
                 loadingProgressBar.setVisibility(View.GONE);
+                String username = usernameEditText.getText().toString();
+                String password = passwordEditText.getText().toString();
+                NavController navController = Navigation.findNavController(view);
+
                 if (loginResult.getError() != null) {
 
-                    String username = usernameEditText.getText().toString();
-                    String password = passwordEditText.getText().toString();
 
                     Bundle bundle = new Bundle();
                     bundle.putString("username", username);
                     bundle.putString("password", password);
 
                     showLoginFailed(loginResult.getError());
-                    NavController navController = Navigation.findNavController(view);
+
                     navController.navigate(R.id.action_loginFragment_to_fragment_signup, bundle);
                 }
                 if (loginResult.getSuccess() != null) {
+                    String uname =  username.substring(0, username.indexOf("@"));
+
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString("username", uname);
+
                     updateUiWithUser(loginResult.getSuccess());
+
+                    navController.navigate(R.id.action_loginFragment_to_fragment_homepage, bundle);
                 }
                 loginViewModel.clearLoginResult();
             }
@@ -141,7 +151,7 @@ public class LoginFragment extends Fragment {
     }
 
     private void updateUiWithUser(LoggedInUserView model) {
-        String welcome = getString(R.string.welcome) + model.getDisplayName();
+        String welcome = getString(R.string.welcome) + " " + model.getDisplayName().substring(0, model.getDisplayName().indexOf('@'));
         // TODO : initiate successful logged in experience
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
