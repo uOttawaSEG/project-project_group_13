@@ -2,9 +2,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -15,17 +15,19 @@ jobs:
 
     defaults:
       run:
-        working-directory: OTAMS   # 👈 your project folder
+        working-directory: OTAMS # Adjust if your project folder is different
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 23
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "23"
+          distribution: "temurin"
+          cache: gradle
+          cache-dependency-path: "**/*.gradle*"
 
       - name: Cache Gradle packages
         uses: actions/cache@v4
@@ -39,6 +41,20 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x gradlew
+
+      - name: Create google-services.json
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "OTAMS/app/google-services.json"
+          json: ${{ secrets.GOOGLE_SERVICES_JSON }}
+
+      - name: Verify google-services.json exists
+        run: |
+          touch app/google-services.json
+          test -f app/google-services.json && echo "google-services.json injected successfully"
+
+      - name: Print first few lines of google-services.json
+        run: head -n 15 app/google-services.json
 
       - name: Build with Gradle Wrapper
         run: ./gradlew clean build --stacktrace
