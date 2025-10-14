@@ -50,5 +50,8 @@ jobs:
           touch app/google-services.json
           test -f app/google-services.json && echo "google-services.json injected successfully"
 
+      - name: Print first few lines of google-services.json
+        run: head -n 15 app/google-services.json
+
       - name: Build with Gradle Wrapper
         run: ./gradlew clean build --stacktrace
