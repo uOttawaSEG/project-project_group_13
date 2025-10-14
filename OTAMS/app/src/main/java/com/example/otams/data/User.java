@@ -1,4 +1,4 @@
-package com.example.otams;
+package com.example.otams.data;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -20,23 +20,6 @@ public class User {
         return password;
     }
 
-    private void hashPassword() {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(this.password.getBytes());
-
-            // Convert byte array into hex string
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashBytes) {
-                hexString.append(String.format("%02x", b));
-            }
-
-            this.password = hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException();
-        }
-
-    }
 }
 
 class Admin extends User {
