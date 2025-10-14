@@ -64,7 +64,7 @@ public class fragment_homepage extends Fragment {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    centerText.setText("Error checking users collection: " + e.getMessage() + " " + email);
+                    centerText.setText("Error checking student collection: " + e.getMessage() + " " + email);
                 });
 
     }
