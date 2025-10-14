@@ -21,11 +21,11 @@
 
 ### Project Overview
 
-***OTAMS (Online Tutoring Appointment Management System)*** is the group project for **SEG 2105 – Introduction to Software Engineering**. 
+**OTAMS** (***Online Tutoring Appointment Management System***) is the group project for **SEG 2105 – Introduction to Software Engineering**. 
 
 ### Admin 
-- Username :
-- Password :
+- Username : `admin@otams.com`
+- Password : `Administrator`
 
 ## TEAM - Group 13
 
