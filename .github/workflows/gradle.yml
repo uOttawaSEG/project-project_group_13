@@ -47,7 +47,7 @@ jobs:
 
       - name: Verify google-services.json exists
         run: |
-          echo "path: $(pwd)"            
+          pwd            
           touch OTAMS/app/google-services.json
           test -f OTAMS/app/google-services.json && echo "google-services.json injected successfully"
 
