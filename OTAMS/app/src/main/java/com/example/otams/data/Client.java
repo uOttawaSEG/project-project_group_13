@@ -1,4 +1,4 @@
-package com.example.otams;
+package com.example.otams.data;
 
 public class Client extends User {
     private String First_Name;
@@ -15,6 +15,15 @@ public class Client extends User {
         this.Phone_Number = Phone_Number;
         this.Future_Session = Future_Session;
         this.Past_Session = Past_Session;
+    }
+
+    public Client(String Email, String Password, String First_Name, String Last_Name, String Phone_Number) {
+        super(Email, Password);
+        this.First_Name = First_Name;
+        this.Last_Name = Last_Name;
+        this.Phone_Number = Phone_Number;
+        this.Future_Session = "";
+        this.Past_Session = "";
     }
 
     public String getFirst_Name() {
@@ -58,10 +67,10 @@ public class Client extends User {
     }
 
     public void accept() {
-        System.out.println("Session accepted.");
+        //System.out.println("Session accepted.");
     }
 
     public void reject() {
-        System.out.println("Session rejected.");
+        //System.out.println("Session rejected.");
     }
 }
