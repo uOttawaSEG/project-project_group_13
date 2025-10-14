@@ -16,9 +16,10 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/indigo"
-        android:paddingStart="30dp"
-        android:paddingEnd="30dp"
+        android:background="@drawable/toolbar_background"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/ThemeOverlay.Material3.Light"
         app:titleTextColor="@android:color/white" />
