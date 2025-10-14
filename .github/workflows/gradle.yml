@@ -43,13 +43,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Inject google-services.json
-        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > OTAMS/app/google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
 
       - name: Verify google-services.json exists
         run: |
-          pwd            
-          touch OTAMS/app/google-services.json
-          test -f OTAMS/app/google-services.json && echo "google-services.json injected successfully"
+          touch app/google-services.json
+          test -f app/google-services.json && echo "google-services.json injected successfully"
 
       - name: Build with Gradle Wrapper
         run: ./gradlew clean build --stacktrace
