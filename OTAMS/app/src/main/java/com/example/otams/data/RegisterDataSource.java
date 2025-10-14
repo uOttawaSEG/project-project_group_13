@@ -24,8 +24,22 @@ public class RegisterDataSource {
                         if (firebaseUser != null) {
                             String uid = firebaseUser.getUid();
 
+                            // Determine role and collection
+                            String role;
+                            String collection;
+                            if (userProfile instanceof Student) {
+                                role = "Student";
+                                collection = "student";
+                            } else if (userProfile instanceof Tutor) {
+                                role = "Tutor";
+                                collection = "tutor";
+                            } else {
+                                role = "Unknown";
+                                collection = "users"; // fallback
+                            }
+
                             // Store user profile in Firestore
-                            db.collection("users")
+                            db.collection(collection)
                                     .document(uid)
                                     .set(userProfile)
                                     .addOnSuccessListener(aVoid -> {
