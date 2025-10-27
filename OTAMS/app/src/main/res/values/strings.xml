@@ -3,9 +3,9 @@
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or Register</string>
+    <string name="action_sign_in">SIGN IN</string>
     <string name="authenticating">Authenticating</string>
-    <string name="action_sign_in_short">Sign in</string>
+    <string name="action_register">REGISTER</string>
     <string name="welcome">"Welcome!"</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >8 characters</string>
@@ -34,5 +34,12 @@
 
     <!-- Button -->
     <string name="register">Register</string>
+    <string name="not_logged_in">Not logged in.</string>
+    <string name="you_belong_to_the_student_collection">You belong to the Student collection.</string>
+    <string name="you_belong_to_the_tutor_collection">You belong to the Tutor collection.</string>
+    <string name="you_are_the_administrator">You are the Administrator.</string>
+    <string name="your_role_could_not_be_determined">Your role could not be determined.</string>
+    <string name="error_checking_tutor_collection">"Error checking tutor collection: "</string>
+    <string name="error_checking_student_collection">"Error checking student collection: "</string>
 
 </resources>

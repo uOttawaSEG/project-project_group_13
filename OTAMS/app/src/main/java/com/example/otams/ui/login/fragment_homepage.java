@@ -9,8 +9,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 
 import com.example.otams.R;
+import com.example.otams.data.UserRole;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -19,7 +21,7 @@ public class fragment_homepage extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_homepage, container, false);
     }
 
@@ -31,7 +33,7 @@ public class fragment_homepage extends Fragment {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null) {
-            centerText.setText("Not logged in.");
+            centerText.setText(R.string.not_logged_in);
             return;
         }
 
@@ -39,32 +41,41 @@ public class fragment_homepage extends Fragment {
         String email = user.getEmail().trim().toLowerCase();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        db.collection("student")
-                .whereEqualTo("username", email)
+        // Check user role from users collection
+        db.collection("users")
+                .document(uid)
                 .get()
-                .addOnSuccessListener(studentQuery -> {
-                    if (!studentQuery.isEmpty()) {
-                        centerText.setText("You belong to the Student collection." + " " + email);
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String role = documentSnapshot.getString("role");
+                        if (role != null) {
+                            switch (role) {
+                                case "ADMIN":
+                                    // Navigate to admin fragment
+                                    androidx.navigation.Navigation.findNavController(view)
+                                            .navigate(R.id.action_fragment_homepage_to_adminFragment);
+                                    break;
+                                case "STUDENT":
+                                    centerText.setText(String.format("%s %s",
+                                            getString(R.string.you_belong_to_the_student_collection), email));
+                                    break;
+                                case "TUTOR":
+                                    centerText.setText(String.format("%s %s",
+                                            getString(R.string.you_belong_to_the_tutor_collection), email));
+                                    break;
+                                default:
+                                    centerText.setText(R.string.your_role_could_not_be_determined);
+                                    break;
+                            }
+                        } else {
+                            centerText.setText(R.string.your_role_could_not_be_determined);
+                        }
                     } else {
-                        db.collection("tutor")
-                                .whereEqualTo("username", email)
-                                .get()
-                                .addOnSuccessListener(tutorQuery -> {
-                                    if (!tutorQuery.isEmpty()) {
-                                        centerText.setText("You belong to the Tutor collection." + " " + email);
-                                    } else if ("admin@otams.com".equalsIgnoreCase(email)) {
-                                        centerText.setText("You are the Administrator.");
-                                    } else {
-                                        centerText.setText("Your role could not be determined.");
-                                    }
-                                })
-                                .addOnFailureListener(e -> {
-                                    centerText.setText("Error checking tutor collection: " + e.getMessage() + " " + email);
-                                });
+                        centerText.setText(R.string.your_role_could_not_be_determined);
                     }
                 })
                 .addOnFailureListener(e -> {
-                    centerText.setText("Error checking student collection: " + e.getMessage() + " " + email);
+                    centerText.setText(String.format("Error checking user role: %s", e.getMessage()));
                 });
 
     }

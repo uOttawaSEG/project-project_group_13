@@ -24,6 +24,7 @@ import com.example.otams.data.RegisterDataSource;
 import com.example.otams.data.Result;
 import com.example.otams.data.Student;
 import com.example.otams.data.Tutor;
+import com.example.otams.data.User;
 import com.example.otams.databinding.FragmentSignupBinding;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,8 +35,8 @@ public class fragment_signup extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         binding = FragmentSignupBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -47,7 +48,7 @@ public class fragment_signup extends Fragment {
 
         loadingProgressBar.setVisibility(View.GONE);
 
-        MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
+        MaterialToolbar toolbar = binding.toolbar;
         toolbar.setTitle("Register"); // Set your title
 
         // Tell Android this toolbar should act as the ActionBar
@@ -61,13 +62,11 @@ public class fragment_signup extends Fragment {
         }
 
         // Handle back navigation manually
-        toolbar.setNavigationOnClickListener(v ->
-                NavHostFragment.findNavController(this).navigateUp());
+        toolbar.setNavigationOnClickListener(v -> NavHostFragment.findNavController(this).navigateUp());
 
-
-        RadioGroup roleGroup = view.findViewById(R.id.role_group);
-        LinearLayout studentFields = view.findViewById(R.id.student_fields);
-        LinearLayout tutorFields = view.findViewById(R.id.tutor_fields);
+        RadioGroup roleGroup = binding.roleGroup;
+        LinearLayout studentFields = binding.studentFields;
+        LinearLayout tutorFields = binding.tutorFields;
 
         // Default state: Student selected
         studentFields.setVisibility(View.VISIBLE);
@@ -92,8 +91,10 @@ public class fragment_signup extends Fragment {
             String username = args.getString("username");
             String password = args.getString("password");
 
-            if (username != null) signupUsername.setText(username);
-            if (password != null) signupPassword.setText(password);
+            if (username != null)
+                signupUsername.setText(username);
+            if (password != null)
+                signupPassword.setText(password);
         }
 
         // Co-pilot suggested this
@@ -117,8 +118,7 @@ public class fragment_signup extends Fragment {
         String emailStr = signupUsername.getText().toString().trim();
         String passwordStr = signupPassword.getText().toString().trim();
 
-
-// Validation trigger
+        // Validation trigger
         TextWatcher watcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -162,8 +162,7 @@ public class fragment_signup extends Fragment {
             }
         };
 
-
-// Attach watcher to all fields
+        // Attach watcher to all fields
         firstName.addTextChangedListener(watcher);
         lastName.addTextChangedListener(watcher);
         signupUsername.addTextChangedListener(watcher);
@@ -174,7 +173,7 @@ public class fragment_signup extends Fragment {
         coursesOffered.addTextChangedListener(watcher);
         highestDegree.addTextChangedListener(watcher);
 
-// Also re-validate on role change
+        // Also re-validate on role change
         roleGroup.setOnCheckedChangeListener((group, checkedId) -> {
             studentFields.setVisibility(checkedId == R.id.radio_student ? View.VISIBLE : View.GONE);
             tutorFields.setVisibility(checkedId == R.id.radio_tutor ? View.VISIBLE : View.GONE);
@@ -198,7 +197,7 @@ public class fragment_signup extends Fragment {
                 String emailStr = signupUsername.getText().toString().trim();
                 String passwordStr = signupPassword.getText().toString().trim();
 
-                Object userProfile;
+                User userProfile;
                 if (roleGroup.getCheckedRadioButtonId() == R.id.radio_student) {
                     userProfile = new Student(emailStr, passwordStr, first, last, phoneStr, programStr);
                 } else {
@@ -211,7 +210,8 @@ public class fragment_signup extends Fragment {
                         .thenAccept(result -> {
                             loadingProgressBar.setVisibility(View.GONE);
                             if (result instanceof Result.Success) {
-                                Toast.makeText(getContext(), "User registered successfully!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "User registered successfully!", Toast.LENGTH_SHORT)
+                                        .show();
                                 NavHostFragment.findNavController(fragment_signup.this).navigateUp();
                             } else if (result instanceof Result.Error) {
                                 Exception e = ((Result.Error) result).getError();
@@ -220,7 +220,6 @@ public class fragment_signup extends Fragment {
                         });
             }
         });
-
 
     }
 }

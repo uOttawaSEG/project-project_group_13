@@ -7,6 +7,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.google.firebase.auth.FirebaseAuth;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,8 +35,11 @@ public class LoginFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+
+        // Sign out any existing user when returning to login screen
+        com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
 
         binding = FragmentLoginBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -85,18 +89,15 @@ public class LoginFragment extends Fragment {
 
                 if (loginResult.getError() != null) {
 
-
                     Bundle bundle = new Bundle();
                     bundle.putString("username", username);
                     bundle.putString("password", password);
 
                     showLoginFailed(loginResult.getError());
 
-                    navController.navigate(R.id.action_loginFragment_to_fragment_signup, bundle);
                 }
                 if (loginResult.getSuccess() != null) {
-                    String uname =  username.substring(0, username.indexOf("@"));
-
+                    String uname = username.substring(0, username.indexOf("@"));
 
                     Bundle bundle = new Bundle();
                     bundle.putString("username", uname);
@@ -140,7 +141,7 @@ public class LoginFragment extends Fragment {
             }
         });
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        binding.login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
@@ -148,19 +149,34 @@ public class LoginFragment extends Fragment {
                         passwordEditText.getText().toString());
             }
         });
+
+        binding.register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String username = usernameEditText.getText().toString();
+
+                Bundle bundle = new Bundle();
+                bundle.putString("username", username);
+
+                NavController navController = Navigation.findNavController(view);
+                navController.navigate(R.id.action_loginFragment_to_fragment_signup, bundle);
+            }
+        });
+
     }
 
     private void updateUiWithUser(LoggedInUserView model) {
-        String welcome = getString(R.string.welcome) + " " + model.getDisplayName().substring(0, model.getDisplayName().indexOf('@'));
+        String welcome = getString(R.string.welcome) + " "
+                + model.getDisplayName().substring(0, model.getDisplayName().indexOf('@'));
         // TODO : initiate successful logged in experience
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
         }
 
-        //todo this will be our main page
+        // todo this will be our main page
 
-//        startActivity(new Intent(getContext(), MainActivity.class));
-//        requireActivity().finish();
+        // startActivity(new Intent(getContext(), MainActivity.class));
+        // requireActivity().finish();
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {
