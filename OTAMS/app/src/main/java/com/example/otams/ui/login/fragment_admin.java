@@ -34,7 +34,7 @@ public class fragment_admin extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_admin, container, false);
     }
 
@@ -52,8 +52,7 @@ public class fragment_admin extends Fragment {
             activity.getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-        toolbar.setNavigationOnClickListener(v ->
-                NavHostFragment.findNavController(this).navigateUp());
+        toolbar.setNavigationOnClickListener(v -> NavHostFragment.findNavController(this).navigateUp());
 
         // Initialize views
         usersRecyclerView = view.findViewById(R.id.users_list);
