@@ -6,17 +6,20 @@ public class Tutor extends Client {
     private String Courses_Offered;
 
     public Tutor(String Email, String Password, String First_Name, String Last_Name, String Phone_Number,
-                 String Future_Session, String Past_Session, String Highest_Degree, String Courses_Offered) {
+            String Future_Session, String Past_Session, String Highest_Degree, String Courses_Offered) {
         super(Email, Password, First_Name, Last_Name, Phone_Number, Future_Session, Past_Session);
 
         this.Highest_Degree = Highest_Degree;
         this.Courses_Offered = Courses_Offered;
+        setRole(UserRole.TUTOR);
     }
 
-    public Tutor(String Email, String Password, String First_Name, String Last_Name, String Phone_Number,String Highest_Degree, String Courses_Offered) {
+    public Tutor(String Email, String Password, String First_Name, String Last_Name, String Phone_Number,
+            String Highest_Degree, String Courses_Offered) {
         super(Email, Password, First_Name, Last_Name, Phone_Number);
         this.Highest_Degree = Highest_Degree;
         this.Courses_Offered = Courses_Offered;
+        setRole(UserRole.TUTOR);
     }
 
     public String getHighest_Degree() {
@@ -33,7 +36,6 @@ public class Tutor extends Client {
 
     public void setCourses_Offered(String Courses_Offered) {
         this.Courses_Offered = Courses_Offered;
-
 
     }
 }
