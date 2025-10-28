@@ -59,7 +59,7 @@ public class fragment_homepage extends Fragment {
 
                         // Check if user is approved
                         if (!"ACTIVE".equals(status)) {
-                            centerText.setText("Your account is " + status + ". Please contact admin.");
+                            centerText.setText("Your account is " + status + ". Please contact admin. 11111111");
                             return;
                         }
                         UserRole role;

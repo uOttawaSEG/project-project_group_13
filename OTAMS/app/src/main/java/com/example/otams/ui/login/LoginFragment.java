@@ -192,14 +192,15 @@ public class LoginFragment extends Fragment {
                                     .navigate(R.id.action_loginFragment_to_fragment_homepage, bundle);
 
                         } else if ("SUSPENDED".equals(status)) {
-                            // User was rejected
-                            auth.signOut();
+                            // User was rejecte
                             Toast.makeText(getContext(),
                                     "Your registration request has been rejected.\n\n" +
                                             "If you believe this is an error or wish to resolve the matter, " +
                                             "please contact administration at:\n" +
                                             "Phone: 1-800-682-6723",
                                     Toast.LENGTH_LONG).show();
+                            Navigation.findNavController(view)
+                                    .navigate(R.id.action_loginFragment_to_fragment_homepage);
 
                         } else if ("PENDING".equals(status)) {
                             // User is waiting for approval
