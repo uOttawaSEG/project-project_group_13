@@ -26,6 +26,7 @@ import androidx.navigation.Navigation;
 
 import com.example.otams.R;
 import com.example.otams.databinding.FragmentLoginBinding;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginFragment extends Fragment {
 
@@ -97,14 +98,8 @@ public class LoginFragment extends Fragment {
 
                 }
                 if (loginResult.getSuccess() != null) {
-                    String uname = username.substring(0, username.indexOf("@"));
-
-                    Bundle bundle = new Bundle();
-                    bundle.putString("username", uname);
-
-                    updateUiWithUser(loginResult.getSuccess());
-
-                    navController.navigate(R.id.action_loginFragment_to_fragment_homepage, bundle);
+                    // Check user status before navigating
+                    checkUserStatusAndNavigate(view, username);
                 }
                 loginViewModel.clearLoginResult();
             }
@@ -163,6 +158,79 @@ public class LoginFragment extends Fragment {
             }
         });
 
+    }
+
+    private void checkUserStatusAndNavigate(View view, String email) {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() == null) {
+            showLoginFailed(R.string.login_failed);
+            return;
+        }
+
+        String userId = auth.getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String status = documentSnapshot.getString("status");
+                        String role = documentSnapshot.getString("role");
+
+                        if ("ACTIVE".equals(status)) {
+                            // User is approved - proceed to homepage
+                            String uname = email.contains("@") ? email.substring(0, email.indexOf("@")) : email;
+                            Bundle bundle = new Bundle();
+                            bundle.putString("username", uname);
+
+                            Toast.makeText(getContext(),
+                                    getString(R.string.welcome) + " " + uname,
+                                    Toast.LENGTH_SHORT).show();
+
+                            Navigation.findNavController(view)
+                                    .navigate(R.id.action_loginFragment_to_fragment_homepage, bundle);
+
+                        } else if ("SUSPENDED".equals(status)) {
+                            // User was rejected
+                            auth.signOut();
+                            Toast.makeText(getContext(),
+                                    "Your registration request was rejected.\n\n" +
+                                            "If you believe this was a mistake, please contact administration at:\n" +
+                                            "Phone: 1-800-OTAMS-ADMIN (1-800-682-6723)\n" +
+                                            "Email: admin@otams.com",
+                                    Toast.LENGTH_LONG).show();
+
+                        } else if ("PENDING".equals(status)) {
+                            // User is waiting for approval
+                            auth.signOut();
+                            Toast.makeText(getContext(),
+                                    "Your registration request is pending administrator approval.\n\n" +
+                                            "You will be able to log in once your account has been approved.\n" +
+                                            "Please check back later.",
+                                    Toast.LENGTH_LONG).show();
+
+                        } else {
+                            // Unknown status
+                            auth.signOut();
+                            Toast.makeText(getContext(),
+                                    "Account status unknown. Please contact administration.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        // User document not found
+                        auth.signOut();
+                        Toast.makeText(getContext(),
+                                "User account not found. Please register first.",
+                                Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    auth.signOut();
+                    Toast.makeText(getContext(),
+                            "Error checking account status: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
     }
 
     private void updateUiWithUser(LoggedInUserView model) {

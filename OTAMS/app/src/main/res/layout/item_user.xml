@@ -23,6 +23,24 @@
             android:text="email@example.com" />
 
         <TextView
+            android:id="@+id/user_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:textSize="14sp"
+            android:text="Name: John Doe" />
+
+        <TextView
+            android:id="@+id/user_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:textSize="14sp"
+            android:text="Phone: 123-456-7890" />
+
+        <TextView
             android:id="@+id/user_role"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,14 +50,53 @@
             android:text="Role: Student" />
 
         <TextView
-            android:id="@+id/user_uid"
+            android:id="@+id/user_additional_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
-            android:textSize="12sp"
-            android:textColor="@android:color/darker_gray"
-            android:text="UID: 123456" />
+            android:textSize="13sp"
+            android:text="Program: Computer Science" />
+
+        <TextView
+            android:id="@+id/user_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:text="Status: PENDING" />
+
+        <LinearLayout
+            android:id="@+id/action_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/approve_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="Approve"
+                android:textColor="@android:color/holo_green_dark" />
+
+            <Button
+                android:id="@+id/reject_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="Reject"
+                android:textColor="@android:color/holo_red_dark" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

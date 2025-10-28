@@ -47,8 +47,8 @@
     </fragment>
     <fragment
         android:id="@+id/adminFragment"
-        android:name="com.example.otams.AdminFragment"
-        android:label="fragment_admin_list"
+        android:name="com.example.otams.ui.login.fragment_admin"
+        android:label="fragment_admin"
         tools:layout="@layout/fragment_admin" >
         <action
             android:id="@+id/action_adminFragment_to_loginFragment"
