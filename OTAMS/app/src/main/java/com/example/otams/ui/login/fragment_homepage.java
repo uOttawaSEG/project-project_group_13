@@ -37,29 +37,50 @@ public class fragment_homepage extends Fragment {
             return;
         }
 
-        String uid = user.getUid();
-        String email = user.getEmail().trim().toLowerCase();
+        String userId = user.getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Debug: Log the user ID
+        android.util.Log.d("Homepage", "Current user ID: " + userId);
 
         // Check user role from users collection
         db.collection("users")
-                .document(uid)
+                .document(userId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
+                    android.util.Log.d("Homepage", "Document exists: " + documentSnapshot.exists());
                     if (documentSnapshot.exists()) {
-                        String role = documentSnapshot.getString("role");
+                        String roles = documentSnapshot.getString("role");
+                        String status = documentSnapshot.getString("status");
+                        String email = documentSnapshot.getString("username");
+                        if (email == null) {
+                            email = documentSnapshot.getString("email");
+                        }
+
+                        // Check if user is approved
+                        if (!"ACTIVE".equals(status)) {
+                            centerText.setText("Your account is " + status + ". Please contact admin.");
+                            return;
+                        }
+                        UserRole role;
+                        try {
+                            role = UserRole.valueOf(roles);
+                        } catch (IllegalArgumentException | NullPointerException e) {
+                            centerText.setText(R.string.your_role_could_not_be_determined);
+                            return;
+                        }
                         if (role != null) {
                             switch (role) {
-                                case "ADMIN":
+                                case ADMIN:
                                     // Navigate to admin fragment
                                     androidx.navigation.Navigation.findNavController(view)
                                             .navigate(R.id.action_fragment_homepage_to_adminFragment);
                                     break;
-                                case "STUDENT":
+                                case STUDENT:
                                     centerText.setText(String.format("%s %s",
                                             getString(R.string.you_belong_to_the_student_collection), email));
                                     break;
-                                case "TUTOR":
+                                case TUTOR:
                                     centerText.setText(String.format("%s %s",
                                             getString(R.string.you_belong_to_the_tutor_collection), email));
                                     break;
@@ -71,10 +92,12 @@ public class fragment_homepage extends Fragment {
                             centerText.setText(R.string.your_role_could_not_be_determined);
                         }
                     } else {
+                        android.util.Log.w("Homepage", "User document not found for ID: " + userId);
                         centerText.setText(R.string.your_role_could_not_be_determined);
                     }
                 })
                 .addOnFailureListener(e -> {
+                    android.util.Log.e("Homepage", "Error fetching user document", e);
                     centerText.setText(String.format("Error checking user role: %s", e.getMessage()));
                 });
 

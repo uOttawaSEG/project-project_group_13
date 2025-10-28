@@ -204,19 +204,40 @@ public class fragment_signup extends Fragment {
                     userProfile = new Tutor(emailStr, passwordStr, first, last, phoneStr, offeredStr, degreeStr);
                 }
 
-                // Call RegisterDataSource
-                RegisterDataSource registerDataSource = new RegisterDataSource();
-                registerDataSource.register(emailStr, passwordStr, userProfile)
-                        .thenAccept(result -> {
+                // Add user directly to Firestore without authentication
+                loadingProgressBar.setVisibility(View.VISIBLE);
+
+                // Generate a unique ID for the user
+                String userId = db.collection("users").document().getId();
+
+                // Determine role
+                String role;
+                if (roleGroup.getCheckedRadioButtonId() == R.id.radio_student) {
+                    role = "STUDENT";
+                } else {
+                    role = "TUTOR";
+                }
+
+                // Set user profile fields
+                userProfile.setRole(com.example.otams.data.UserRole.valueOf(role));
+                userProfile.setStatus(com.example.otams.data.UserStatus.PENDING);
+
+                // Store user in users collection with all data
+                db.collection("users")
+                        .document(userId)
+                        .set(userProfile)
+                        .addOnSuccessListener(aVoid -> {
                             loadingProgressBar.setVisibility(View.GONE);
-                            if (result instanceof Result.Success) {
-                                Toast.makeText(getContext(), "User registered successfully!", Toast.LENGTH_SHORT)
-                                        .show();
-                                NavHostFragment.findNavController(fragment_signup.this).navigateUp();
-                            } else if (result instanceof Result.Error) {
-                                Exception e = ((Result.Error) result).getError();
-                                Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                            }
+                            Toast.makeText(getContext(),
+                                    "Registration submitted! Wait for admin approval.",
+                                    Toast.LENGTH_LONG).show();
+                            NavHostFragment.findNavController(fragment_signup.this).navigateUp();
+                        })
+                        .addOnFailureListener(e -> {
+                            loadingProgressBar.setVisibility(View.GONE);
+                            Toast.makeText(getContext(),
+                                    "Error creating user: " + e.getMessage(),
+                                    Toast.LENGTH_LONG).show();
                         });
             }
         });

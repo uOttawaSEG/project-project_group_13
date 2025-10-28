@@ -24,34 +24,10 @@ public class RegisterDataSource {
                         if (firebaseUser != null) {
                             String uid = firebaseUser.getUid();
 
-                            // Determine role and collection
 
-                            String collection;
-                            if (userProfile.getRole() == UserRole.STUDENT) {
-
-                                collection = "students";
-                            } else if (userProfile.getRole() == UserRole.TUTOR) {
-
-                                collection = "tutors";
-                            } else {
-                                future.complete(new Result.Error(new Exception("Invalid user profile type")));
-                                return;
-                            }
-
-                            // First store user profile with role in main users collection
-                            db.collection("users")
-                                    .document(uid)
-                                    .set(java.util.Map.of(
-                                            "role", userProfile.getRole().toString(),
-                                            "email", email,
-                                            "uid", uid))
-                                    .addOnFailureListener(e -> {
-                                        future.complete(new Result.Error(
-                                                new Exception("Failed to create user record: " + e.getMessage())));
-                                    });
 
                             // Then store detailed profile in role-specific collection
-                            db.collection(collection)
+                            db.collection("users")
                                     .document(uid)
                                     .set(userProfile)
                                     .addOnSuccessListener(aVoid -> {
