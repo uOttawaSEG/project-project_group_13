@@ -195,10 +195,10 @@ public class LoginFragment extends Fragment {
                             // User was rejected
                             auth.signOut();
                             Toast.makeText(getContext(),
-                                    "Your registration request was rejected.\n\n" +
-                                            "If you believe this was a mistake, please contact administration at:\n" +
-                                            "Phone: 1-800-OTAMS-ADMIN (1-800-682-6723)\n" +
-                                            "Email: admin@otams.com",
+                                    "Your registration request has been rejected.\n\n" +
+                                            "If you believe this is an error or wish to resolve the matter, " +
+                                            "please contact administration at:\n" +
+                                            "Phone: 1-800-682-6723",
                                     Toast.LENGTH_LONG).show();
 
                         } else if ("PENDING".equals(status)) {
@@ -206,7 +206,7 @@ public class LoginFragment extends Fragment {
                             auth.signOut();
                             Toast.makeText(getContext(),
                                     "Your registration request is pending administrator approval.\n\n" +
-                                            "You will be able to log in once your account has been approved.\n" +
+                                            "You will be able to log in once your account has been approved. " +
                                             "Please check back later.",
                                     Toast.LENGTH_LONG).show();
 

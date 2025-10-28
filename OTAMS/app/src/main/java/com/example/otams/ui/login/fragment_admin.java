@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.otams.R;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -298,15 +299,21 @@ public class fragment_admin extends Fragment {
 
     private void updateUserStatus(String uid, String newStatus) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Simply update the status field in Firestore
         db.collection("users")
                 .document(uid)
                 .update("status", newStatus)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "User status updated to " + newStatus, Toast.LENGTH_SHORT).show();
-                    loadUsers(); // Reload the list
+                    String message = "ACTIVE".equals(newStatus) ? "User approved and activated"
+                            : "User status updated to " + newStatus;
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    loadUsers();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error updating status: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(),
+                            "Error updating status: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
                 });
     }
 }

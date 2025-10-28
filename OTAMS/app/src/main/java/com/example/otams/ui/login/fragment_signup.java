@@ -27,6 +27,7 @@ import com.example.otams.data.Tutor;
 import com.example.otams.data.User;
 import com.example.otams.databinding.FragmentSignupBinding;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class fragment_signup extends Fragment {
@@ -183,7 +184,6 @@ public class fragment_signup extends Fragment {
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
                 loadingProgressBar.setVisibility(View.VISIBLE);
 
                 // Extract fresh input values
@@ -197,19 +197,6 @@ public class fragment_signup extends Fragment {
                 String emailStr = signupUsername.getText().toString().trim();
                 String passwordStr = signupPassword.getText().toString().trim();
 
-                User userProfile;
-                if (roleGroup.getCheckedRadioButtonId() == R.id.radio_student) {
-                    userProfile = new Student(emailStr, passwordStr, first, last, phoneStr, programStr);
-                } else {
-                    userProfile = new Tutor(emailStr, passwordStr, first, last, phoneStr, offeredStr, degreeStr);
-                }
-
-                // Add user directly to Firestore without authentication
-                loadingProgressBar.setVisibility(View.VISIBLE);
-
-                // Generate a unique ID for the user
-                String userId = db.collection("users").document().getId();
-
                 // Determine role
                 String role;
                 if (roleGroup.getCheckedRadioButtonId() == R.id.radio_student) {
@@ -218,25 +205,55 @@ public class fragment_signup extends Fragment {
                     role = "TUTOR";
                 }
 
-                // Set user profile fields
-                userProfile.setRole(com.example.otams.data.UserRole.valueOf(role));
-                userProfile.setStatus(com.example.otams.data.UserStatus.PENDING);
+                // Create Firebase Auth account first
+                FirebaseAuth.getInstance()
+                        .createUserWithEmailAndPassword(emailStr, passwordStr)
+                        .addOnSuccessListener(authResult -> {
+                            String userId = authResult.getUser().getUid();
 
-                // Store user in users collection with all data
-                db.collection("users")
-                        .document(userId)
-                        .set(userProfile)
-                        .addOnSuccessListener(aVoid -> {
-                            loadingProgressBar.setVisibility(View.GONE);
-                            Toast.makeText(getContext(),
-                                    "Registration submitted! Wait for admin approval.",
-                                    Toast.LENGTH_LONG).show();
-                            NavHostFragment.findNavController(fragment_signup.this).navigateUp();
+                            // Create user profile object
+                            User userProfile;
+                            if (roleGroup.getCheckedRadioButtonId() == R.id.radio_student) {
+                                userProfile = new Student(emailStr, passwordStr, first, last, phoneStr, programStr);
+                            } else {
+                                userProfile = new Tutor(emailStr, passwordStr, first, last, phoneStr, offeredStr,
+                                        degreeStr);
+                            }
+
+                            // Set user profile fields
+                            userProfile.setRole(com.example.otams.data.UserRole.valueOf(role));
+                            userProfile.setStatus(com.example.otams.data.UserStatus.PENDING);
+
+                            // Store user profile in Firestore using the Auth UID
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                            db.collection("users")
+                                    .document(userId)
+                                    .set(userProfile)
+                                    .addOnSuccessListener(aVoid -> {
+                                        loadingProgressBar.setVisibility(View.GONE);
+
+                                        // Sign out the user since they need admin approval first
+                                        FirebaseAuth.getInstance().signOut();
+
+                                        Toast.makeText(getContext(),
+                                                "Registration submitted! Wait for admin approval before logging in.",
+                                                Toast.LENGTH_LONG).show();
+                                        NavHostFragment.findNavController(fragment_signup.this).navigateUp();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        loadingProgressBar.setVisibility(View.GONE);
+                                        Toast.makeText(getContext(),
+                                                "Error saving user profile: " + e.getMessage(),
+                                                Toast.LENGTH_LONG).show();
+
+                                        // Delete the auth account if Firestore save failed
+                                        authResult.getUser().delete();
+                                    });
                         })
                         .addOnFailureListener(e -> {
                             loadingProgressBar.setVisibility(View.GONE);
                             Toast.makeText(getContext(),
-                                    "Error creating user: " + e.getMessage(),
+                                    "Error creating account: " + e.getMessage(),
                                     Toast.LENGTH_LONG).show();
                         });
             }
