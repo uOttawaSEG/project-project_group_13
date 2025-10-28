@@ -7,7 +7,22 @@ on:
     branches: ["main"]
 
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      otams_changed: ${{ steps.filter.outputs.otams }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            otams:
+              - 'OTAMS/**'
+
   build:
+    needs: check-changes
+    if: needs.check-changes.outputs.otams_changed == 'true'
     runs-on: ubuntu-latest
 
     permissions:
@@ -50,3 +65,11 @@ jobs:
 
       - name: Build with Gradle Wrapper
         run: ./gradlew clean build --stacktrace
+
+  skip-build:
+    needs: check-changes
+    if: needs.check-changes.outputs.otams_changed == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip build
+        run: echo "No changes in OTAMS folder, skipping build ✓"
