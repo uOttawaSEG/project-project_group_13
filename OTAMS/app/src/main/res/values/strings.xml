@@ -42,5 +42,6 @@
     <string name="error_checking_tutor_collection">"Error checking tutor collection: "</string>
     <string name="error_checking_student_collection">"Error checking student collection: "</string>
     <string name="no_users_found">No users found</string>
+    <string name="log_out">LOG OUT</string>
 
 </resources>

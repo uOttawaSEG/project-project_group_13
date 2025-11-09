@@ -20,13 +20,10 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.otams.R;
-import com.example.otams.data.RegisterDataSource;
-import com.example.otams.data.Result;
 import com.example.otams.data.Student;
 import com.example.otams.data.Tutor;
 import com.example.otams.data.User;
 import com.example.otams.databinding.FragmentSignupBinding;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -39,6 +36,7 @@ public class fragment_signup extends Fragment {
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
         binding = FragmentSignupBinding.inflate(inflater, container, false);
+        requireActivity().setTitle("Register");
         return binding.getRoot();
     }
 
@@ -49,21 +47,14 @@ public class fragment_signup extends Fragment {
 
         loadingProgressBar.setVisibility(View.GONE);
 
-        MaterialToolbar toolbar = binding.toolbar;
-        toolbar.setTitle("Register"); // Set your title
-
         // Tell Android this toolbar should act as the ActionBar
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
-        activity.setSupportActionBar(toolbar);
 
         // Enable back (Up) button
         if (activity.getSupportActionBar() != null) {
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             activity.getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-
-        // Handle back navigation manually
-        toolbar.setNavigationOnClickListener(v -> NavHostFragment.findNavController(this).navigateUp());
 
         RadioGroup roleGroup = binding.roleGroup;
         LinearLayout studentFields = binding.studentFields;
