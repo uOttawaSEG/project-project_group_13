@@ -48,7 +48,14 @@ public class fragment_login extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
+        final EditText usernameEditText = binding.username;
+        final EditText passwordEditText = binding.password;
+        final Button loginButton = binding.login;
+        final ProgressBar loadingProgressBar = binding.loading;
+
+        loadingProgressBar.setVisibility(View.GONE);
 
     }
 
