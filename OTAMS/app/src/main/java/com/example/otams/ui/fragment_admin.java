@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.otams.R;
 import com.example.otams.data.FirebaseManager;
+import com.example.otams.data.MenuUtils;
 import com.example.otams.databinding.FragmentAdminBinding;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -148,6 +149,12 @@ public class fragment_admin extends Fragment {
         }).addOnFailureListener(e -> {
             Toast.makeText(getContext(), "Error updating status: " + e.getMessage(), Toast.LENGTH_LONG).show();
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null; // assuming you're using ViewBinding
     }
 
     private static class UserInfo {

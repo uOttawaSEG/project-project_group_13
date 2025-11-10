@@ -28,4 +28,10 @@ public class fragment_student extends Fragment {
 
         return binding.getRoot();
     }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null; // assuming you're using ViewBinding
+    }
+
 }
