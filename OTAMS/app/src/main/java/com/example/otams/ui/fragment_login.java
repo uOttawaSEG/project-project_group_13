@@ -164,8 +164,8 @@ public class fragment_login extends Fragment {
         if (password.isEmpty()) {
             passwordEditText.setError("Password is required");
             isValid = false;
-        } else if (password.length() < 6) {
-            passwordEditText.setError("Password must be at least 6 characters");
+        } else if (password.length() < 8) {
+            passwordEditText.setError("Password must be at least 8 characters");
             isValid = false;
         } else {
             passwordEditText.setError(null);
