@@ -1,13 +1,19 @@
 package com.example.otams.data;
 
+import android.util.Log;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
+import java.util.ArrayList;
 
 public class FirebaseManager {
     private static FirebaseManager instance;
@@ -47,8 +53,7 @@ public class FirebaseManager {
     }
 
     public void signIn(String email, String password, OnCompleteListener<AuthResult> listener) {
-        auth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(listener);
+        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(listener);
     }
 
     public FirebaseUser getCurrentUser() {
@@ -56,24 +61,38 @@ public class FirebaseManager {
     }
 
     public void signUp(String email, String password, OnCompleteListener<AuthResult> listener) {
-        auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(listener);
+        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(listener);
     }
 
-    /**
-     * Save a user profile (Student, Tutor, etc.) to Firestore.
-     * @param uid The Firebase Auth UID.
-     * @param userProfile The user profile object to save.
-     * @param onSuccess Callback on success.
-     * @param onFailure Callback on failure with Exception.
-     */
-    public void saveUserProfile(String uid, Object userProfile,
-                                OnSuccessListener<Void> onSuccess,
-                                OnFailureListener onFailure) {
-        firestore.collection("users")
-                .document(uid)
-                .set(userProfile)
-                .addOnSuccessListener(onSuccess)
-                .addOnFailureListener(onFailure);
+    public void saveUserProfile(String uid, Object userProfile, OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
+        firestore.collection("users").document(uid).set(userProfile).addOnSuccessListener(onSuccess).addOnFailureListener(onFailure);
+    }
+
+    public ArrayList<Session> getFutureSessions() {
+        ArrayList<Session> futureSessions = new ArrayList<>();
+        firestore.collection("sessions").whereGreaterThan("start_time", Timestamp.now()).orderBy("start_time", Query.Direction.ASCENDING).get().addOnSuccessListener(querySnapshot -> {
+
+            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                Session session = doc.toObject(Session.class);
+                if (session != null) {
+                    futureSessions.add(session);
+                }
+            }
+        }).addOnFailureListener(e -> Log.e("Firestore", "Error loading sessions", e));
+        return futureSessions;
+    }
+
+    public ArrayList<Session> getPastSessions() {
+        ArrayList<Session> pastSessions = new ArrayList<>();
+        firestore.collection("sessions").whereLessThanOrEqualTo("start_time", Timestamp.now()).orderBy("start_time", Query.Direction.ASCENDING).get().addOnSuccessListener(querySnapshot -> {
+
+            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                Session session = doc.toObject(Session.class);
+                if (session != null) {
+                    pastSessions.add(session);
+                }
+            }
+        }).addOnFailureListener(e -> Log.e("Firestore", "Error loading sessions", e));
+        return pastSessions;
     }
 }

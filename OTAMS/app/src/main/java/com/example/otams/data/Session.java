@@ -2,17 +2,22 @@ package com.example.otams.data;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import com.google.firebase.Timestamp;
+
 
 public class Session {
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+
+    private String course_code;
+    private Timestamp  start_time;
+    private Timestamp  end_time;
     private Tutor tutor;
     private ArrayList<Student> students;
 
-    public Session(LocalDateTime startTime, LocalDateTime endTime, Tutor tutor) {
-        this.startTime = startTime;
-        this.endTime = endTime;
+    public Session(String course_code, Timestamp  start_time, Timestamp  end_time, Tutor tutor) {
+        this.start_time = start_time;
+        this.end_time = end_time;
         this.tutor = tutor;
+        this.course_code = course_code;
     }
 
     public Session() {
@@ -23,20 +28,28 @@ public class Session {
         this.tutor = tutor;
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
+    public String getCourseCode() {
+        return course_code;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
+    public void setCourseCode(String course_code) {
+        this.course_code = course_code;
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
+    public Timestamp  getStartTime() {
+        return start_time;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
+    public void setStartTime(Timestamp  startTime) {
+        this.start_time = startTime;
+    }
+
+    public Timestamp  getEndTime() {
+        return end_time;
+    }
+
+    public void setEndTime(Timestamp  endTime) {
+        this.end_time = endTime;
     }
 
     public Tutor getTutor() {

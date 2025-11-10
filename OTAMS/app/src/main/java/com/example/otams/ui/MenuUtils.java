@@ -1,4 +1,4 @@
-package com.example.otams.data;
+package com.example.otams.ui;
 
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +12,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.otams.R;
+import com.example.otams.data.FirebaseManager;
 
 public class MenuUtils {
     public static void setupLogoutMenu(Fragment fragment, FirebaseManager firebaseManager) {

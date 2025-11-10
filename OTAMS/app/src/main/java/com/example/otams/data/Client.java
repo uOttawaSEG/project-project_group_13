@@ -1,16 +1,15 @@
 package com.example.otams.data;
 
-import java.time.LocalDateTime;
+import com.google.firebase.Timestamp;
 
 public class Client extends User {
     private String first_name;
     private String last_name;
     private String phone_number;
-    private LocalDateTime future_session;
-    private LocalDateTime past_session;
+    private Timestamp future_session;
+    private Timestamp past_session;
 
-    public Client(String email, String password, String first_name, String last_name, String phone_number,
-            LocalDateTime future_session, LocalDateTime past_session) {
+    public Client(String email, String password, String first_name, String last_name, String phone_number, Timestamp future_session, Timestamp past_session) {
         super(email, password);
         this.first_name = first_name;
         this.last_name = last_name;
@@ -24,8 +23,8 @@ public class Client extends User {
         this.first_name = first_name;
         this.last_name = last_name;
         this.phone_number = phone_number;
-        this.future_session = LocalDateTime.parse("");
-        this.past_session = LocalDateTime.parse("");
+        this.future_session = null;
+        this.past_session = null;
     }
 
     public String getFirst_name() {
@@ -52,19 +51,19 @@ public class Client extends User {
         this.phone_number = phone_number;
     }
 
-    public LocalDateTime getFuture_session() {
+    public Timestamp getFuture_session() {
         return future_session;
     }
 
-    public void setFuture_session(LocalDateTime future_session) {
+    public void setFuture_session(Timestamp future_session) {
         this.future_session = future_session;
     }
 
-    public LocalDateTime getPast_session() {
+    public Timestamp getPast_session() {
         return past_session;
     }
 
-    public void setPast_session(LocalDateTime past_session) {
+    public void setPast_session(Timestamp past_session) {
         this.past_session = past_session;
     }
 
