@@ -1,5 +1,7 @@
 package com.example.otams.data;
 
+import java.time.LocalDateTime;
+
 public class Client extends User {
     private String first_name;
     private String last_name;
@@ -22,8 +24,8 @@ public class Client extends User {
         this.first_name = first_name;
         this.last_name = last_name;
         this.phone_number = phone_number;
-        this.future_session = "";
-        this.past_session = "";
+        this.future_session = LocalDateTime.parse("");
+        this.past_session = LocalDateTime.parse("");
     }
 
     public String getFirst_name() {

@@ -1,11 +1,13 @@
 package com.example.otams.data;
 
+import java.time.LocalDateTime;
+
 public class Student extends Client {
 
     private String program_of_study;
 
     public Student(String Email, String Password, String First_Name, String Last_Name, String Phone_Number,
-            String Future_Session, String Past_Session, String program_of_study) {
+                   LocalDateTime Future_Session, LocalDateTime  Past_Session, String program_of_study) {
         super(Email, Password, First_Name, Last_Name, Phone_Number, Future_Session, Past_Session);
         this.program_of_study = program_of_study;
         setRole(UserRole.STUDENT);

@@ -1,33 +1,35 @@
 package com.example.otams.data;
 
+import java.time.LocalDateTime;
+
 public class Tutor extends Client {
 
-    private String Highest_Degree;
+    private String highest_degree;
     private String Courses_Offered;
 
     public Tutor(String Email, String Password, String First_Name, String Last_Name, String Phone_Number,
-            String Future_Session, String Past_Session, String Highest_Degree, String Courses_Offered) {
+                 LocalDateTime Future_Session, LocalDateTime Past_Session, String highest_degree, String Courses_Offered) {
         super(Email, Password, First_Name, Last_Name, Phone_Number, Future_Session, Past_Session);
 
-        this.Highest_Degree = Highest_Degree;
+        this.highest_degree = highest_degree;
         this.Courses_Offered = Courses_Offered;
         setRole(UserRole.TUTOR);
     }
 
     public Tutor(String Email, String Password, String First_Name, String Last_Name, String Phone_Number,
-            String Highest_Degree, String Courses_Offered) {
+            String highest_degree, String Courses_Offered) {
         super(Email, Password, First_Name, Last_Name, Phone_Number);
-        this.Highest_Degree = Highest_Degree;
+        this.highest_degree = highest_degree;
         this.Courses_Offered = Courses_Offered;
         setRole(UserRole.TUTOR);
     }
 
-    public String getHighest_Degree() {
-        return Highest_Degree;
+    public String getHighest_degree() {
+        return highest_degree;
     }
 
-    public void setHighest_Degree(String Highest_Degree) {
-        this.Highest_Degree = Highest_Degree;
+    public void setHighest_degree(String highest_degree) {
+        this.highest_degree = highest_degree;
     }
 
     public String getCourses_Offered() {
