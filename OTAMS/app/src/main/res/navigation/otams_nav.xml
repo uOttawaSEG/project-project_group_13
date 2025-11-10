@@ -42,7 +42,7 @@
             android:name="username"
             app:argType="string" />
         <action
-            android:id="@+id/action_fragment_homepage_to_adminFragment"
+            android:id="@+id/action_fragment_homepage_to_fragment_admin"
             app:destination="@id/fragment_admin" />
         <action
             android:id="@+id/action_fragment_homepage_to_fragment_tutor"

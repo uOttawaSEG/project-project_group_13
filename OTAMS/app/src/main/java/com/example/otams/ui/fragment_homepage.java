@@ -88,7 +88,7 @@ public class fragment_homepage extends Fragment {
 
                     if (role == UserRole.ADMIN) {
                         NavController navController = Navigation.findNavController(requireView());
-                        navController.navigate(R.id.action_fragment_homepage_to_adminFragment);
+                        navController.navigate(R.id.action_fragment_homepage_to_fragment_admin);
                     }
 
                     if (role == UserRole.TUTOR) {
