@@ -48,13 +48,6 @@ public class fragment_admin extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Setup toolbar with back button
-        MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(android.R.drawable.ic_menu_close_clear_cancel); // Built-in back icon
-        toolbar.setNavigationOnClickListener(v -> {
-            // Sign out and navigate to login
-            com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
-            NavHostFragment.findNavController(this).navigate(R.id.loginFragment);
-        });
 
         // Initialize views
         usersRecyclerView = view.findViewById(R.id.users_list);

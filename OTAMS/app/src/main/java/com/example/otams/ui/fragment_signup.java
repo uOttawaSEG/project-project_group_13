@@ -38,7 +38,6 @@ public class fragment_signup extends Fragment {
         binding = FragmentSignupBinding.inflate(inflater, container, false);
         requireActivity().setTitle("Register");
         firebaseManager = FirebaseManager.getInstance();
-        setHasOptionsMenu(false);
         return binding.getRoot();
     }
 
