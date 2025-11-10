@@ -27,7 +27,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Set up navigation host and controller
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
-        assert navHostFragment != null;
+        if (navHostFragment == null) {
+            throw new IllegalStateException("NavHostFragment not found");
+        }
         NavController navController = navHostFragment.getNavController();
 
         // AppBarConfiguration: define which fragments have no back button
