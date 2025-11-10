@@ -39,10 +39,6 @@ public class fragment_homepage extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        firebaseManager.signOut();
-        NavController navController = Navigation.findNavController(requireView());
-        navController.navigate(R.id.loginFragment);
-
     }
 
 
