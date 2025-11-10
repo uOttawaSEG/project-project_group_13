@@ -1,6 +1,6 @@
 //Claude made changes to this file
 
-package com.example.otams.ui.login;
+package com.example.otams.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

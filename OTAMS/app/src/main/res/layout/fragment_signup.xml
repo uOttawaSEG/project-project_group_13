@@ -133,14 +133,6 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/hint_program"
                     android:minHeight="48dp" />
-
-                <EditText
-                    android:id="@+id/courses_enrolled"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:hint="@string/hint_courses_enrolled"
-                    android:minHeight="48dp" />
             </LinearLayout>
 
             <!-- Tutor Fields -->

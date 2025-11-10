@@ -3,6 +3,8 @@ package com.example.otams;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
@@ -20,11 +22,11 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // Set up navigation
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host_fragment);
-        if (navHostFragment != null) {
-            NavController navController = navHostFragment.getNavController();
-            NavigationUI.setupWithNavController(toolbar, navController);
-        }
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        NavOptions navOptions = new NavOptions.Builder()
+                .setPopUpTo(R.id.otams_nav, true)  // replace with your root nav_graph ID
+                .build();
+
+        navController.navigate(R.id.loginFragment, null, navOptions);
     }
 }

@@ -1,33 +1,74 @@
-package com.example.otams.ui.login;
+package com.example.otams.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.example.otams.R;
+import com.example.otams.data.FirebaseManager;
 import com.example.otams.data.UserRole;
+import com.example.otams.databinding.FragmentHomepageBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class fragment_homepage extends Fragment {
+    private FragmentHomepageBinding binding;
+    private FirebaseManager firebaseManager;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_homepage, container, false);
+        binding = FragmentHomepageBinding.inflate(inflater, container, false);
+        firebaseManager = FirebaseManager.getInstance();
+        requireActivity().setTitle("Home");
+        return binding.getRoot();
+    }
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_logout) {
+            // ✅ Handle logout here
+            firebaseManager.signOut();
+
+            NavController navController = Navigation.findNavController(requireView());
+            navController.navigate(R.id.loginFragment);
+
+            Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        binding.action_logout.setOnClickListener(v -> {
+            firebaseManager.signOut();
+
+            NavController navController = Navigation.findNavController(view);
+            navController.navigate(R.id.mainContainer); // your login fragment ID
+
+            Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+        });
 
         TextView centerText = view.findViewById(R.id.centerText);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();

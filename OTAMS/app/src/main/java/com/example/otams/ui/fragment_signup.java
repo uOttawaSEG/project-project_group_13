@@ -1,4 +1,4 @@
-package com.example.otams.ui.login;
+package com.example.otams.ui;
 
 import android.os.Bundle;
 import android.text.Editable;
@@ -6,249 +6,183 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.example.otams.R;
+import com.example.otams.data.FirebaseManager;
 import com.example.otams.data.Student;
 import com.example.otams.data.Tutor;
 import com.example.otams.data.User;
+import com.example.otams.data.UserStatus;
 import com.example.otams.databinding.FragmentSignupBinding;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Objects;
 
 public class fragment_signup extends Fragment {
+
     private FragmentSignupBinding binding;
+    private FirebaseManager firebaseManager;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
-            @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         binding = FragmentSignupBinding.inflate(inflater, container, false);
         requireActivity().setTitle("Register");
+        firebaseManager = FirebaseManager.getInstance();
+        setHasOptionsMenu(false);
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        final ProgressBar loadingProgressBar = binding.loading;
 
-        loadingProgressBar.setVisibility(View.GONE);
-
-        // Tell Android this toolbar should act as the ActionBar
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
-
-        // Enable back (Up) button
         if (activity.getSupportActionBar() != null) {
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             activity.getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-        RadioGroup roleGroup = binding.roleGroup;
-        LinearLayout studentFields = binding.studentFields;
-        LinearLayout tutorFields = binding.tutorFields;
+        binding.loading.setVisibility(View.GONE);
 
-        // Default state: Student selected
-        studentFields.setVisibility(View.VISIBLE);
-        tutorFields.setVisibility(View.GONE);
+        // Default role: Student
+        binding.studentFields.setVisibility(View.VISIBLE);
+        binding.tutorFields.setVisibility(View.GONE);
 
-        // Listen for role selection changes
-        roleGroup.setOnCheckedChangeListener((group, checkedId) -> {
+        // Handle role switch visibility
+        binding.roleGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.radio_student) {
-                studentFields.setVisibility(View.VISIBLE);
-                tutorFields.setVisibility(View.GONE);
+                binding.studentFields.setVisibility(View.VISIBLE);
+                binding.tutorFields.setVisibility(View.GONE);
             } else if (checkedId == R.id.radio_tutor) {
-                studentFields.setVisibility(View.GONE);
-                tutorFields.setVisibility(View.VISIBLE);
+                binding.studentFields.setVisibility(View.GONE);
+                binding.tutorFields.setVisibility(View.VISIBLE);
             }
+            validateForm(); // recheck button state
         });
 
-        EditText signupUsername = view.findViewById(R.id.email);
-        EditText signupPassword = view.findViewById(R.id.password);
-
+        // Pre-fill fields from arguments (optional)
         Bundle args = getArguments();
         if (args != null) {
             String username = args.getString("username");
             String password = args.getString("password");
-
-            if (username != null)
-                signupUsername.setText(username);
-            if (password != null)
-                signupPassword.setText(password);
+            if (username != null) binding.email.setText(username);
+            if (password != null) binding.password.setText(password);
         }
 
-        // Co-pilot suggested this
-        EditText firstName = view.findViewById(R.id.first_name);
-        EditText lastName = view.findViewById(R.id.last_name);
-        EditText phone = view.findViewById(R.id.phone);
-        EditText program = view.findViewById(R.id.program);
-        EditText coursesEnrolled = view.findViewById(R.id.courses_enrolled);
-        EditText coursesOffered = view.findViewById(R.id.courses_offered);
-        EditText highestDegree = view.findViewById(R.id.highest_degree);
-
-        Button registerButton = view.findViewById(R.id.register_button);
-
-        String first = firstName.getText().toString().trim();
-        String last = lastName.getText().toString().trim();
-        String phoneStr = phone.getText().toString().trim();
-        String programStr = program.getText().toString().trim();
-        String enrolledStr = coursesEnrolled.getText().toString().trim();
-        String offeredStr = coursesOffered.getText().toString().trim();
-        String degreeStr = highestDegree.getText().toString().trim();
-        String emailStr = signupUsername.getText().toString().trim();
-        String passwordStr = signupPassword.getText().toString().trim();
-
-        // Validation trigger
+        // Attach a single TextWatcher to all fields
         TextWatcher watcher = new TextWatcher() {
             @Override
+            public void afterTextChanged(Editable s) {
+                validateForm();
+            }
+
+            @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // ignore
+
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // ignore
-            }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                boolean isStudent = roleGroup.getCheckedRadioButtonId() == R.id.radio_student;
-
-                String first = firstName.getText().toString().trim();
-                String last = lastName.getText().toString().trim();
-                String phoneStr = phone.getText().toString().trim();
-                String programStr = program.getText().toString().trim();
-                String enrolledStr = coursesEnrolled.getText().toString().trim();
-                String offeredStr = coursesOffered.getText().toString().trim();
-                String degreeStr = highestDegree.getText().toString().trim();
-                String emailStr = signupUsername.getText().toString().trim();
-                String passwordStr = signupPassword.getText().toString().trim();
-
-                boolean commonValid = !first.isEmpty()
-                        && !last.isEmpty()
-                        && !emailStr.isEmpty()
-                        && !passwordStr.isEmpty()
-                        && !phoneStr.isEmpty();
-
-                boolean studentValid = isStudent
-                        && !programStr.isEmpty()
-                        && !enrolledStr.isEmpty();
-
-                boolean tutorValid = !isStudent
-                        && !offeredStr.isEmpty()
-                        && !degreeStr.isEmpty();
-
-                registerButton.setEnabled(commonValid && (studentValid || tutorValid));
             }
         };
 
-        // Attach watcher to all fields
-        firstName.addTextChangedListener(watcher);
-        lastName.addTextChangedListener(watcher);
-        signupUsername.addTextChangedListener(watcher);
-        signupPassword.addTextChangedListener(watcher);
-        phone.addTextChangedListener(watcher);
-        program.addTextChangedListener(watcher);
-        coursesEnrolled.addTextChangedListener(watcher);
-        coursesOffered.addTextChangedListener(watcher);
-        highestDegree.addTextChangedListener(watcher);
+        binding.firstName.addTextChangedListener(watcher);
+        binding.lastName.addTextChangedListener(watcher);
+        binding.phone.addTextChangedListener(watcher);
+        binding.program.addTextChangedListener(watcher);
+        binding.coursesOffered.addTextChangedListener(watcher);
+        binding.highestDegree.addTextChangedListener(watcher);
+        binding.email.addTextChangedListener(watcher);
+        binding.password.addTextChangedListener(watcher);
 
-        // Also re-validate on role change
-        roleGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            studentFields.setVisibility(checkedId == R.id.radio_student ? View.VISIBLE : View.GONE);
-            tutorFields.setVisibility(checkedId == R.id.radio_tutor ? View.VISIBLE : View.GONE);
-            watcher.afterTextChanged(null); // trigger re-validation
-        });
+        binding.registerButton.setOnClickListener(v -> handleRegistration());
+    }
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadingProgressBar.setVisibility(View.VISIBLE);
+    // --- FORM VALIDATION ---
+    private void validateForm() {
+        boolean isStudent = binding.roleGroup.getCheckedRadioButtonId() == R.id.radio_student;
 
-                // Extract fresh input values
-                String first = firstName.getText().toString().trim();
-                String last = lastName.getText().toString().trim();
-                String phoneStr = phone.getText().toString().trim();
-                String programStr = program.getText().toString().trim();
-                String enrolledStr = coursesEnrolled.getText().toString().trim();
-                String offeredStr = coursesOffered.getText().toString().trim();
-                String degreeStr = highestDegree.getText().toString().trim();
-                String emailStr = signupUsername.getText().toString().trim();
-                String passwordStr = signupPassword.getText().toString().trim();
+        String first = binding.firstName.getText().toString().trim();
+        String last = binding.lastName.getText().toString().trim();
+        String phone = binding.phone.getText().toString().trim();
+        String email = binding.email.getText().toString().trim();
+        String password = binding.password.getText().toString().trim();
 
-                // Determine role
-                String role;
-                if (roleGroup.getCheckedRadioButtonId() == R.id.radio_student) {
-                    role = "STUDENT";
-                } else {
-                    role = "TUTOR";
-                }
+        boolean commonValid = !first.isEmpty() && !last.isEmpty() && !email.isEmpty()
+                && !password.isEmpty() && !phone.isEmpty();
 
-                // Create Firebase Auth account first
-                FirebaseAuth.getInstance()
-                        .createUserWithEmailAndPassword(emailStr, passwordStr)
-                        .addOnSuccessListener(authResult -> {
-                            String userId = authResult.getUser().getUid();
+        boolean studentValid = isStudent
+                && !binding.program.getText().toString().trim().isEmpty();
+        boolean tutorValid = !isStudent
+                && !binding.coursesOffered.getText().toString().trim().isEmpty()
+                && !binding.highestDegree.getText().toString().trim().isEmpty();
 
-                            // Create user profile object
-                            User userProfile;
-                            if (roleGroup.getCheckedRadioButtonId() == R.id.radio_student) {
-                                userProfile = new Student(emailStr, passwordStr, first, last, phoneStr, programStr);
-                            } else {
-                                userProfile = new Tutor(emailStr, passwordStr, first, last, phoneStr, offeredStr,
-                                        degreeStr);
-                            }
+        binding.registerButton.setEnabled(commonValid && (studentValid || tutorValid));
+    }
 
-                            // Set user profile fields
-                            userProfile.setRole(com.example.otams.data.UserRole.valueOf(role));
-                            userProfile.setStatus(com.example.otams.data.UserStatus.PENDING);
+    // --- REGISTRATION LOGIC ---
+    private void handleRegistration() {
+        binding.loading.setVisibility(View.VISIBLE);
 
-                            // Store user profile in Firestore using the Auth UID
-                            FirebaseFirestore db = FirebaseFirestore.getInstance();
-                            db.collection("users")
-                                    .document(userId)
-                                    .set(userProfile)
-                                    .addOnSuccessListener(aVoid -> {
-                                        loadingProgressBar.setVisibility(View.GONE);
+        String first = binding.firstName.getText().toString().trim();
+        String last = binding.lastName.getText().toString().trim();
+        String phone = binding.phone.getText().toString().trim();
+        String program = binding.program.getText().toString().trim();
+        String offered = binding.coursesOffered.getText().toString().trim();
+        String degree = binding.highestDegree.getText().toString().trim();
+        String email = binding.email.getText().toString().trim();
+        String password = binding.password.getText().toString().trim();
 
-                                        // Sign out the user since they need admin approval first
-                                        FirebaseAuth.getInstance().signOut();
+        boolean isStudent = binding.roleGroup.getCheckedRadioButtonId() == R.id.radio_student;
 
-                                        Toast.makeText(getContext(),
-                                                "Registration submitted! Wait for admin approval before logging in.",
-                                                Toast.LENGTH_LONG).show();
-                                        NavHostFragment.findNavController(fragment_signup.this).navigateUp();
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        loadingProgressBar.setVisibility(View.GONE);
-                                        Toast.makeText(getContext(),
-                                                "Error saving user profile: " + e.getMessage(),
-                                                Toast.LENGTH_LONG).show();
+        User userProfile;
+        if (isStudent) {
+            userProfile = new Student(email, password, first, last, phone, program);
+        } else {
+            userProfile = new Tutor(email, password, first, last, phone, degree, offered);
+        }
 
-                                        // Delete the auth account if Firestore save failed
-                                        authResult.getUser().delete();
-                                    });
-                        })
-                        .addOnFailureListener(e -> {
-                            loadingProgressBar.setVisibility(View.GONE);
+        userProfile.setStatus(UserStatus.PENDING);
+
+        firebaseManager.signUp(email, password, task -> {
+            if (task.isSuccessful()) {
+                String uid = Objects.requireNonNull(task.getResult().getUser()).getUid();
+                firebaseManager.saveUserProfile(uid, userProfile,
+                        aVoid -> {
+                            binding.loading.setVisibility(View.GONE);
                             Toast.makeText(getContext(),
-                                    "Error creating account: " + e.getMessage(),
-                                    Toast.LENGTH_LONG).show();
+                                    "Registration successful. Wait for approval.", Toast.LENGTH_LONG).show();
+                            NavController navController = Navigation.findNavController(requireView());
+                            navController.navigate(R.id.loginFragment);
+                        },
+                        e -> {
+                            binding.loading.setVisibility(View.GONE);
+                            Toast.makeText(getContext(),
+                                    "Failed to save user profile: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         });
+            } else {
+                binding.loading.setVisibility(View.GONE);
+                Toast.makeText(getContext(),
+                        "Registration failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null; // avoid memory leaks
+    }
+
 }

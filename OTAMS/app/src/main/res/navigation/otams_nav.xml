@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.otams.ui.login.fragment_login"
+        android:name="com.example.otams.ui.fragment_login"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
@@ -19,7 +19,7 @@
     </fragment>
     <fragment
         android:id="@+id/fragment_signup"
-        android:name="com.example.otams.ui.login.fragment_signup"
+        android:name="com.example.otams.ui.fragment_signup"
         android:label="fragment_signup"
         tools:layout="@layout/fragment_signup" >
         <action
@@ -32,7 +32,7 @@
     </fragment>
     <fragment
         android:id="@+id/fragment_homepage"
-        android:name="com.example.otams.ui.login.fragment_homepage"
+        android:name="com.example.otams.ui.fragment_homepage"
         android:label="fragment_homepage"
         tools:layout="@layout/fragment_homepage" >
         <action
@@ -47,7 +47,7 @@
     </fragment>
     <fragment
         android:id="@+id/adminFragment"
-        android:name="com.example.otams.ui.login.fragment_admin"
+        android:name="com.example.otams.ui.fragment_admin"
         android:label="fragment_admin"
         tools:layout="@layout/fragment_admin" >
         <action

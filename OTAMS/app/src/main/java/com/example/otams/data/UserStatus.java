@@ -1,9 +1,9 @@
 package com.example.otams.data;
 
 public enum UserStatus {
-    APPROVE,
+    APPROVED,
     PENDING,
-    REJECT
+    REJECTED
 }
 
 
