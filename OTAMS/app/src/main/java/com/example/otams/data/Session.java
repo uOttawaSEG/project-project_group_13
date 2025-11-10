@@ -6,17 +6,21 @@ import java.util.ArrayList;
 public class Session {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private String tutorID;
-    private ArrayList<String> studentID;
+    private Tutor tutor;
+    private ArrayList<Student> students;
 
-    public Session(LocalDateTime startTime, LocalDateTime endTime, String tutorID) {
+    public Session(LocalDateTime startTime, LocalDateTime endTime, Tutor tutor) {
         this.startTime = startTime;
         this.endTime = endTime;
-        this.tutorID = tutorID;
+        this.tutor = tutor;
     }
 
     public Session() {
-        //default Constructor
+        // default Constructor
+    }
+
+    public Session(Tutor tutor) {
+        this.tutor = tutor;
     }
 
     public LocalDateTime getStartTime() {
@@ -35,34 +39,33 @@ public class Session {
         this.endTime = endTime;
     }
 
-    public String getTutorID() {
-        return tutorID;
+    public Tutor getTutor() {
+        return tutor;
     }
 
-    public void setTutorID(String tutorID) {
-        this.tutorID = tutorID;
+    public void setTutor(Tutor tutor) {
+        this.tutor = tutor;
     }
 
-    public ArrayList<String> getStudentID() {
-        return studentID;
+    public ArrayList<Student> getStudents() {
+        return students;
     }
 
-    public void setStudentID(ArrayList<String> studentID) {
-        this.studentID = studentID;
+    public void setStudents(ArrayList<Student> students) {
+        this.students = students;
     }
 
-    public void addStudent(String studentID) {
-        if (this.studentID == null) {
-            this.studentID = new ArrayList<>();
+    public void addStudent(Student student) {
+        if (this.students == null) {
+            this.students = new ArrayList<>();
         }
-        this.studentID.add(studentID);
+        this.students.add(student);
     }
 
-    public void removeStudent(String studentID) {
-        if (this.studentID != null) {
-            this.studentID.remove(studentID);
+    public void removeStudent(Student student) {
+        if (this.students != null) {
+            this.students.remove(student);
         }
     }
-
 
 }

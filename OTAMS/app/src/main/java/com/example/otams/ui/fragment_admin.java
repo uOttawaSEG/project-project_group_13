@@ -4,9 +4,6 @@ package com.example.otams.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -18,15 +15,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.otams.R;
 import com.example.otams.data.FirebaseManager;
+import com.example.otams.data.MenuUtils;
 import com.example.otams.databinding.FragmentAdminBinding;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -58,26 +53,7 @@ public class fragment_admin extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        requireActivity().addMenuProvider(new MenuProvider() {
-            @Override
-            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
-                // Inflate your menu here
-                menuInflater.inflate(R.menu.menu, menu);
-            }
-
-            @Override
-            public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
-                if (menuItem.getItemId() == R.id.action_logout) {
-                    // Handle logout click
-                    firebaseManager.signOut();
-                    NavController navController = Navigation.findNavController(requireView());
-                    navController.navigate(R.id.loginFragment);
-                    Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                return false;
-            }
-        }, getViewLifecycleOwner());
+        MenuUtils.setupLogoutMenu(this, firebaseManager);
 
         usersRecyclerView = view.findViewById(R.id.users_list);
         loadingProgressBar = view.findViewById(R.id.loading);
@@ -95,10 +71,13 @@ public class fragment_admin extends Fragment {
         roleGroup.setOnCheckedChangeListener((group, checkedId) -> {
             clearView();
             if (checkedId == R.id.radio_pending) {
+                showingRejected = false;
                 loadUsersByStatus("PENDING");
             } else if (checkedId == R.id.radio_rejected) {
+                showingRejected = true;
                 loadUsersByStatus("REJECTED");
             }
+
         });
     }
 
@@ -116,11 +95,27 @@ public class fragment_admin extends Fragment {
         loadingProgressBar.setVisibility(View.VISIBLE);
         emptyView.setVisibility(View.GONE);
 
-        firebaseManager.getFirestore().collection("users").whereEqualTo("status", status).get().addOnSuccessListener(queryDocumentSnapshots -> {
+        firebaseManager.getFirestore().collection("users").whereEqualTo("status", status).addSnapshotListener((querySnapshot, e) -> {
+            // Handle errors first
+            if (e != null) {
+                loadingProgressBar.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Error loading users: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            // Handle null snapshot (happens if listener is removed or query is invalid)
+            if (querySnapshot == null) {
+                loadingProgressBar.setVisibility(View.GONE);
+                emptyView.setVisibility(View.VISIBLE);
+                emptyView.setText(R.string.no_data_available);
+                return;
+            }
+
             loadingProgressBar.setVisibility(View.GONE);
+
             usersList.clear();
 
-            for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+            for (QueryDocumentSnapshot document : querySnapshot) {
                 String uid = document.getId();
                 String email = document.getString("email");
                 String firstName = document.getString("first_name");
@@ -138,13 +133,11 @@ public class fragment_admin extends Fragment {
             }
 
             if (usersList.isEmpty()) {
+                emptyView.setText(showingRejected ? "No rejected users found." : "No pending users found.");
                 emptyView.setVisibility(View.VISIBLE);
             } else {
                 userAdapter.notifyDataSetChanged();
             }
-        }).addOnFailureListener(e -> {
-            loadingProgressBar.setVisibility(View.GONE);
-            Toast.makeText(getContext(), "Error loading users: " + e.getMessage(), Toast.LENGTH_LONG).show();
         });
     }
 
@@ -156,6 +149,12 @@ public class fragment_admin extends Fragment {
         }).addOnFailureListener(e -> {
             Toast.makeText(getContext(), "Error updating status: " + e.getMessage(), Toast.LENGTH_LONG).show();
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null; // assuming you're using ViewBinding
     }
 
     private static class UserInfo {

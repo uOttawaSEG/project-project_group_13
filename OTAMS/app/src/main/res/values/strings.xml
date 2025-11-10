@@ -49,5 +49,6 @@
      <string name="contact_admin">". Please contact admin. 11111111"</string>
     <string name="criteria_pending">PENDING</string>
     <string name="criteria_rejected">REJECTED</string>
+    <string name="no_data_available">No data available.</string>
 
 </resources>

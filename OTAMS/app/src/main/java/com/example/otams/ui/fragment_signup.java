@@ -66,6 +66,7 @@ public class fragment_signup extends Fragment {
             }
             validateForm(); // recheck button state
         });
+        binding.registerButton.setOnClickListener(v -> handleRegistration());
 
         // Pre-fill fields from arguments (optional)
         Bundle args = getArguments();
@@ -102,13 +103,15 @@ public class fragment_signup extends Fragment {
         binding.highestDegree.addTextChangedListener(watcher);
         binding.email.addTextChangedListener(watcher);
         binding.password.addTextChangedListener(watcher);
-
-        binding.registerButton.setOnClickListener(v -> handleRegistration());
     }
 
     // --- FORM VALIDATION ---
     private void validateForm() {
-        boolean isStudent = binding.roleGroup.getCheckedRadioButtonId() == R.id.radio_student;
+        if (binding == null) return;
+
+        int selectedRole = binding.roleGroup.getCheckedRadioButtonId();
+        boolean roleSelected = selectedRole != -1;
+        boolean isStudent = selectedRole == R.id.radio_student;
 
         String first = binding.firstName.getText().toString().trim();
         String last = binding.lastName.getText().toString().trim();
@@ -116,13 +119,76 @@ public class fragment_signup extends Fragment {
         String email = binding.email.getText().toString().trim();
         String password = binding.password.getText().toString().trim();
 
-        boolean commonValid = !first.isEmpty() && !last.isEmpty() && !email.isEmpty() && !password.isEmpty() && !phone.isEmpty();
+        boolean isValid = true;
 
-        boolean studentValid = isStudent && !binding.program.getText().toString().trim().isEmpty();
-        boolean tutorValid = !isStudent && !binding.coursesOffered.getText().toString().trim().isEmpty() && !binding.highestDegree.getText().toString().trim().isEmpty();
+        // First Name
+        if (first.isEmpty()) {
+            binding.firstName.setError("First name required");
+            isValid = false;
+        } else {
+            binding.firstName.setError(null);
+        }
 
-        binding.registerButton.setEnabled(commonValid && (studentValid || tutorValid));
+        // Last Name
+        if (last.isEmpty()) {
+            binding.lastName.setError("Last name required");
+            isValid = false;
+        } else {
+            binding.lastName.setError(null);
+        }
+
+        // Phone
+        if (phone.isEmpty()) {
+            binding.phone.setError("Phone required");
+            isValid = false;
+        } else {
+            binding.phone.setError(null);
+        }
+
+        // Email validation
+        if (email.isEmpty()) {
+            binding.email.setError("Email is required");
+            isValid = false;
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.email.setError("Enter a valid email address");
+            isValid = false;
+        } else {
+            binding.email.setError(null);
+        }
+
+        // Password validation
+        if (password.isEmpty()) {
+            binding.password.setError("Password is required");
+            isValid = false;
+        } else if (password.length() < 8) {
+            binding.password.setError("Password must be at least 8 characters");
+            isValid = false;
+        } else {
+            binding.password.setError(null);
+        }
+
+        // Role-specific fields
+        boolean studentValid = false;
+        boolean tutorValid = false;
+
+        if (isStudent) {
+            studentValid = !binding.program.getText().toString().trim().isEmpty();
+            if (!studentValid) binding.program.setError("Program required");
+            else binding.program.setError(null);
+        } else if (roleSelected) {
+            tutorValid = !binding.coursesOffered.getText().toString().trim().isEmpty() && !binding.highestDegree.getText().toString().trim().isEmpty();
+
+            if (binding.coursesOffered.getText().toString().trim().isEmpty()) binding.coursesOffered.setError("Courses required");
+            else binding.coursesOffered.setError(null);
+
+            if (binding.highestDegree.getText().toString().trim().isEmpty()) binding.highestDegree.setError("Degree required");
+            else binding.highestDegree.setError(null);
+        }
+
+        // Enable button only if valid
+        binding.registerButton.setEnabled(isValid && roleSelected && (studentValid || tutorValid));
     }
+
 
     // --- REGISTRATION LOGIC ---
     private void handleRegistration() {
