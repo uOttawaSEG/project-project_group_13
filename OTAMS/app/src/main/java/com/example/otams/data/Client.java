@@ -1,76 +1,78 @@
 package com.example.otams.data;
 
+import java.time.LocalDateTime;
+
 public class Client extends User {
-    private String First_Name;
-    private String Last_Name;
-    private String Phone_Number;
-    private String Future_Session;
-    private String Past_Session;
+    private String first_name;
+    private String last_name;
+    private String phone_number;
+    private LocalDateTime future_session;
+    private LocalDateTime past_session;
 
-    public Client(String Email, String Password, String First_Name, String Last_Name, String Phone_Number,
-                  String Future_Session, String Past_Session) {
-        super(Email, Password);
-        this.First_Name = First_Name;
-        this.Last_Name = Last_Name;
-        this.Phone_Number = Phone_Number;
-        this.Future_Session = Future_Session;
-        this.Past_Session = Past_Session;
+    public Client(String email, String password, String first_name, String last_name, String phone_number,
+            LocalDateTime future_session, LocalDateTime past_session) {
+        super(email, password);
+        this.first_name = first_name;
+        this.last_name = last_name;
+        this.phone_number = phone_number;
+        this.future_session = future_session;
+        this.past_session = past_session;
     }
 
-    public Client(String Email, String Password, String First_Name, String Last_Name, String Phone_Number) {
-        super(Email, Password);
-        this.First_Name = First_Name;
-        this.Last_Name = Last_Name;
-        this.Phone_Number = Phone_Number;
-        this.Future_Session = "";
-        this.Past_Session = "";
+    public Client(String email, String password, String first_name, String last_name, String phone_number) {
+        super(email, password);
+        this.first_name = first_name;
+        this.last_name = last_name;
+        this.phone_number = phone_number;
+        this.future_session = LocalDateTime.parse("");
+        this.past_session = LocalDateTime.parse("");
     }
 
-    public String getFirst_Name() {
-        return First_Name;
+    public String getFirst_name() {
+        return first_name;
     }
 
-    public void setFirst_Name(String First_Name) {
-        this.First_Name = First_Name;
+    public void setFirst_name(String first_name) {
+        this.first_name = first_name;
     }
 
-    public String getLast_Name() {
-        return Last_Name;
+    public String getLast_name() {
+        return last_name;
     }
 
-    public void setLast_Name(String Last_Name) {
-        this.Last_Name = Last_Name;
+    public void setLast_name(String last_name) {
+        this.last_name = last_name;
     }
 
-    public String getPhone_Number() {
-        return Phone_Number;
+    public String getPhone_number() {
+        return phone_number;
     }
 
-    public void setPhone_Number(String Phone_Number) {
-        this.Phone_Number = Phone_Number;
+    public void setPhone_number(String phone_number) {
+        this.phone_number = phone_number;
     }
 
-    public String getFuture_Session() {
-        return Future_Session;
+    public LocalDateTime getFuture_session() {
+        return future_session;
     }
 
-    public void setFuture_Session(String Future_Session) {
-        this.Future_Session = Future_Session;
+    public void setFuture_session(LocalDateTime future_session) {
+        this.future_session = future_session;
     }
 
-    public String getPast_Session() {
-        return Past_Session;
+    public LocalDateTime getPast_session() {
+        return past_session;
     }
 
-    public void setPast_Session(String Past_Session) {
-        this.Past_Session = Past_Session;
+    public void setPast_session(LocalDateTime past_session) {
+        this.past_session = past_session;
     }
 
     public void accept() {
-        //System.out.println("Session accepted.");
+        // System.out.println("Session accepted.");
     }
 
     public void reject() {
-        //System.out.println("Session rejected.");
+        // System.out.println("Session rejected.");
     }
 }

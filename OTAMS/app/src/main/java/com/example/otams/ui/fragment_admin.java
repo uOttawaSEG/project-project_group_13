@@ -123,15 +123,15 @@ public class fragment_admin extends Fragment {
             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                 String uid = document.getId();
                 String email = document.getString("email");
-                String firstName = document.getString("first_Name");
-                String lastName = document.getString("last_Name");
-                String phoneNumber = document.getString("phone_Number");
+                String firstName = document.getString("first_name");
+                String lastName = document.getString("last_name");
+                String phoneNumber = document.getString("phone_number");
                 String role = document.getString("role");
                 String additionalInfo = "";
                 if (Objects.equals(role, "STUDENT")) {
-                    additionalInfo = document.getString("program_Of_Study");
+                    additionalInfo = document.getString("program_of_study");
                 } else if (Objects.equals(role, "TUTOR")) {
-                    additionalInfo = document.getString("Courses_Offered") + "\n" + document.getString("Highest_Degree");
+                    additionalInfo = document.getString("courses_offered") + "\n" + document.getString("highest_degree");
 
                 }
                 usersList.add(new UserInfo(uid, email, firstName, lastName, phoneNumber, role, status, additionalInfo));
