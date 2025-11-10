@@ -47,5 +47,7 @@
     <string name="user_is_pending_approval">User is pending approval.</string>
     <string name="your_account">"Your account is "</string>
      <string name="contact_admin">". Please contact admin. 11111111"</string>
+    <string name="criteria_pending">PENDING</string>
+    <string name="criteria_rejected">REJECTED</string>
 
 </resources>

@@ -95,7 +95,7 @@ public class fragment_homepage extends Fragment {
                                 NavController navController = Navigation.findNavController(requireView());
                                 navController.navigate(R.id.action_fragment_homepage_to_fragment_tutor);
                             }
-                        }else{
+                        } else {
                             binding.centerText.setText(String.format("%s%s%s", getString(R.string.your_account), status, getString(R.string.contact_admin)));
                         }
 

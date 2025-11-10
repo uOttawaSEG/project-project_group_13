@@ -18,9 +18,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceListItem"
-            android:textStyle="bold"
             android:textSize="16sp"
-            android:text="email@example.com" />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/user_name"
@@ -28,8 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
-            android:textSize="14sp"
-            android:text="Name: John Doe" />
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/user_phone"
@@ -37,8 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
-            android:textSize="14sp"
-            android:text="Phone: 123-456-7890" />
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/user_role"
@@ -46,8 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
-            android:textSize="14sp"
-            android:text="Role: Student" />
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/user_additional_info"
@@ -55,8 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
-            android:textSize="13sp"
-            android:text="Program: Computer Science" />
+            android:textSize="13sp" />
 
         <TextView
             android:id="@+id/user_status"
@@ -65,8 +60,7 @@
             android:layout_marginTop="4dp"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
             android:textSize="14sp"
-            android:textStyle="bold"
-            android:text="Status: PENDING" />
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/action_buttons"

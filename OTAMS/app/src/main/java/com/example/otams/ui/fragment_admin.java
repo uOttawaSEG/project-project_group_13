@@ -4,72 +4,122 @@ package com.example.otams.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.otams.R;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.otams.data.FirebaseManager;
+import com.example.otams.databinding.FragmentAdminBinding;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class fragment_admin extends Fragment {
 
+    private FirebaseManager firebaseManager;
+    private FragmentAdminBinding binding;
     private RecyclerView usersRecyclerView;
     private ProgressBar loadingProgressBar;
     private TextView emptyView;
     private UserAdapter userAdapter;
     private List<UserInfo> usersList;
+    private boolean showingRejected = false;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_admin, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        binding = FragmentAdminBinding.inflate(inflater, container, false);
+        requireActivity().setTitle("Admin");
+        firebaseManager = FirebaseManager.getInstance();
+
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Setup toolbar with back button
+        requireActivity().addMenuProvider(new MenuProvider() {
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
+                // Inflate your menu here
+                menuInflater.inflate(R.menu.menu, menu);
+            }
 
-        // Initialize views
+            @Override
+            public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
+                if (menuItem.getItemId() == R.id.action_logout) {
+                    // Handle logout click
+                    firebaseManager.signOut();
+                    NavController navController = Navigation.findNavController(requireView());
+                    navController.navigate(R.id.loginFragment);
+                    Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                return false;
+            }
+        }, getViewLifecycleOwner());
+
         usersRecyclerView = view.findViewById(R.id.users_list);
         loadingProgressBar = view.findViewById(R.id.loading);
         emptyView = view.findViewById(R.id.empty_view);
 
-        // Setup RecyclerView
         usersList = new ArrayList<>();
         userAdapter = new UserAdapter(usersList);
         usersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         usersRecyclerView.setAdapter(userAdapter);
 
-        // Load users from Firebase
-        loadUsers();
+        loadUsersByStatus("PENDING");
+
+        RadioGroup roleGroup = view.findViewById(R.id.criteria);
+
+        roleGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            clearView();
+            if (checkedId == R.id.radio_pending) {
+                loadUsersByStatus("PENDING");
+            } else if (checkedId == R.id.radio_rejected) {
+                loadUsersByStatus("REJECTED");
+            }
+        });
     }
 
-    private void loadUsers() {
+    private void clearView() {
+        // Clear current data
+        usersList.clear();
+        userAdapter.notifyDataSetChanged();
+
+        // Hide empty view and show loading (optional)
+        emptyView.setVisibility(View.GONE);
+        loadingProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void loadUsersByStatus(String status) {
         loadingProgressBar.setVisibility(View.VISIBLE);
         emptyView.setVisibility(View.GONE);
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("users")
+        firebaseManager.getFirestore().collection("users")
+                .whereEqualTo("status", status)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     loadingProgressBar.setVisibility(View.GONE);
@@ -78,71 +128,19 @@ public class fragment_admin extends Fragment {
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String uid = document.getId();
                         String email = document.getString("email");
-                        String username = document.getString("username");
-
-                        // Use email if available, otherwise use username
-                        String displayEmail = email != null ? email : username;
-
-                        // Get name fields - Firestore uses lowercase property names from getters
                         String firstName = document.getString("first_Name");
-                        if (firstName == null)
-                            firstName = document.getString("First_Name");
-
                         String lastName = document.getString("last_Name");
-                        if (lastName == null)
-                            lastName = document.getString("Last_Name");
-
                         String phoneNumber = document.getString("phone_Number");
-                        if (phoneNumber == null)
-                            phoneNumber = document.getString("Phone_Number");
-
-                        // Get role - handle both enum name and old string format
-                        Object roleObj = document.get("role");
-                        String role = roleObj != null ? roleObj.toString() : "UNKNOWN";
-
-                        // Skip ADMIN users
-                        if ("ADMIN".equals(role)) {
-                            continue;
-                        }
-
-                        // Get status - handle both enum name and old string format
-                        Object statusObj = document.get("status");
-                        String status = statusObj != null ? statusObj.toString() : "ACTIVE";
-
-                        // Get role-specific information (exclude password)
+                        String role = document.getString("role");
                         String additionalInfo = "";
-                        if ("STUDENT".equals(role)) {
-                            String program = document.getString("program_Of_Study");
-                            if (program == null)
-                                program = document.getString("Program_Of_Study");
-                            if (program != null) {
-                                additionalInfo = "Program: " + program;
-                            }
-                        } else if ("TUTOR".equals(role)) {
-                            String courses = document.getString("courses_Offered");
-                            if (courses == null)
-                                courses = document.getString("Courses_Offered");
+                        if (Objects.equals(role, "STUDENT")) {
+                            additionalInfo = document.getString("program_Of_Study");
+                        } else if (Objects.equals(role, "TUTOR")) {
+                            additionalInfo = document.getString("Courses_Offered") + "\n" +
+                                    document.getString("Highest_Degree");
 
-                            String degree = document.getString("highest_Degree");
-                            if (degree == null)
-                                degree = document.getString("Highest_Degree");
-
-                            if (courses != null && degree != null) {
-                                additionalInfo = "Courses: " + courses + "\nDegree: " + degree;
-                            } else if (courses != null) {
-                                additionalInfo = "Courses: " + courses;
-                            } else if (degree != null) {
-                                additionalInfo = "Degree: " + degree;
-                            }
                         }
-
-                        usersList.add(new UserInfo(uid,
-                                displayEmail,
-                                firstName,
-                                lastName,
-                                phoneNumber,
-                                role,
-                                status,
+                        usersList.add(new UserInfo(uid, email, firstName, lastName, phoneNumber, role, status,
                                 additionalInfo));
                     }
 
@@ -154,12 +152,25 @@ public class fragment_admin extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     loadingProgressBar.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), "Error loading users: " + e.getMessage(),
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Error loading users: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
-    // UserInfo class to hold user data
+    private void updateUserStatus(String uid, String newStatus) {
+        firebaseManager.getFirestore().collection("users")
+                .document(uid)
+                .update("status", newStatus)
+                .addOnSuccessListener(aVoid -> {
+                    String message = "APPROVED".equals(newStatus) ? "User approved and activated"
+                            : "User status updated to " + newStatus;
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    loadUsersByStatus(showingRejected ? "REJECTED" : "PENDING");
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Error updating status: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+    }
+
     private static class UserInfo {
         String uid;
         String email;
@@ -170,8 +181,8 @@ public class fragment_admin extends Fragment {
         String status;
         String additionalInfo;
 
-        UserInfo(String uid, String email, String firstName, String lastName, String phoneNumber,
-                String role, String status, String additionalInfo) {
+        UserInfo(String uid, String email, String firstName, String lastName, String phoneNumber, String role,
+                 String status, String additionalInfo) {
             this.uid = uid;
             this.email = email;
             this.firstName = firstName;
@@ -183,7 +194,6 @@ public class fragment_admin extends Fragment {
         }
     }
 
-    // Adapter for RecyclerView
     private class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
         private final List<UserInfo> users;
 
@@ -194,8 +204,7 @@ public class fragment_admin extends Fragment {
         @NonNull
         @Override
         public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_user, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user, parent, false);
             return new UserViewHolder(view);
         }
 
@@ -203,60 +212,32 @@ public class fragment_admin extends Fragment {
         public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
             UserInfo user = users.get(position);
             holder.emailTextView.setText(user.email);
+            holder.nameTextView.setText(String.format("Name: %s %s", user.firstName, user.lastName));
+            holder.phoneTextView.setText(String.format("Phone: %s", user.phoneNumber));
+            holder.roleTextView.setText(String.format("Role: %s", user.role));
+            holder.statusTextView.setText(String.format("Status: %s", user.status));
 
-            // Display full name
-            String fullName = "Name: ";
-            if (user.firstName != null && user.lastName != null) {
-                fullName += user.firstName + " " + user.lastName;
-            } else if (user.firstName != null) {
-                fullName += user.firstName;
-            } else if (user.lastName != null) {
-                fullName += user.lastName;
-            } else {
-                fullName += "N/A";
-            }
-            holder.nameTextView.setText(fullName);
-
-            // Display phone number
-            String phone = "Phone: " + (user.phoneNumber != null ? user.phoneNumber : "N/A");
-            holder.phoneTextView.setText(phone);
-
-            holder.roleTextView.setText("Role: " + user.role);
-
-            // Display additional info (program for students, courses/degree for tutors)
-            if (user.additionalInfo != null && !user.additionalInfo.isEmpty()) {
-                holder.additionalInfoTextView.setText(user.additionalInfo);
-                holder.additionalInfoTextView.setVisibility(View.VISIBLE);
-            } else {
-                holder.additionalInfoTextView.setVisibility(View.GONE);
-            }
-
-            holder.statusTextView.setText("Status: " + user.status);
-
-            // Set status text color
             if ("PENDING".equals(user.status)) {
-                holder.statusTextView
-                        .setTextColor(holder.itemView.getContext().getColor(android.R.color.holo_orange_dark));
                 holder.actionButtons.setVisibility(View.VISIBLE);
-            } else if ("ACTIVE".equals(user.status)) {
-                holder.statusTextView
-                        .setTextColor(holder.itemView.getContext().getColor(android.R.color.holo_green_dark));
-                holder.actionButtons.setVisibility(View.GONE);
-            } else if ("SUSPENDED".equals(user.status)) {
-                holder.statusTextView
-                        .setTextColor(holder.itemView.getContext().getColor(android.R.color.holo_red_dark));
-                holder.actionButtons.setVisibility(View.GONE);
+                holder.approveButton.setVisibility(View.VISIBLE);
+                holder.rejectButton.setVisibility(View.VISIBLE);
+                holder.approveButton.setOnClickListener(v -> {
+                    updateUserStatus(user.uid, "APPROVED");
+                    clearView();
+                });
+                holder.rejectButton.setOnClickListener(v -> {
+                    updateUserStatus(user.uid, "REJECTED");
+                    clearView();
+                });
+            } else if ("REJECTED".equals(user.status)) {
+                holder.actionButtons.setVisibility(View.VISIBLE);
+                holder.approveButton.setVisibility(View.VISIBLE);
+                holder.rejectButton.setVisibility(View.GONE);
+                holder.approveButton.setOnClickListener(v -> {
+                    updateUserStatus(user.uid, "APPROVED");
+                    clearView();
+                });
             }
-
-            // Handle approve button
-            holder.approveButton.setOnClickListener(v -> {
-                updateUserStatus(user.uid, "ACTIVE");
-            });
-
-            // Handle reject button
-            holder.rejectButton.setOnClickListener(v -> {
-                updateUserStatus(user.uid, "SUSPENDED");
-            });
         }
 
         @Override
@@ -269,7 +250,6 @@ public class fragment_admin extends Fragment {
             TextView nameTextView;
             TextView phoneTextView;
             TextView roleTextView;
-            TextView additionalInfoTextView;
             TextView statusTextView;
             LinearLayout actionButtons;
             Button approveButton;
@@ -281,32 +261,11 @@ public class fragment_admin extends Fragment {
                 nameTextView = itemView.findViewById(R.id.user_name);
                 phoneTextView = itemView.findViewById(R.id.user_phone);
                 roleTextView = itemView.findViewById(R.id.user_role);
-                additionalInfoTextView = itemView.findViewById(R.id.user_additional_info);
                 statusTextView = itemView.findViewById(R.id.user_status);
                 actionButtons = itemView.findViewById(R.id.action_buttons);
                 approveButton = itemView.findViewById(R.id.approve_button);
                 rejectButton = itemView.findViewById(R.id.reject_button);
             }
         }
-    }
-
-    private void updateUserStatus(String uid, String newStatus) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        // Simply update the status field in Firestore
-        db.collection("users")
-                .document(uid)
-                .update("status", newStatus)
-                .addOnSuccessListener(aVoid -> {
-                    String message = "ACTIVE".equals(newStatus) ? "User approved and activated"
-                            : "User status updated to " + newStatus;
-                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-                    loadUsers();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(),
-                            "Error updating status: " + e.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                });
     }
 }
