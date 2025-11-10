@@ -46,9 +46,7 @@ public class fragment_admin extends Fragment {
     private boolean showingRejected = false;
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentAdminBinding.inflate(inflater, container, false);
         requireActivity().setTitle("Admin");
         firebaseManager = FirebaseManager.getInstance();
@@ -118,57 +116,46 @@ public class fragment_admin extends Fragment {
         loadingProgressBar.setVisibility(View.VISIBLE);
         emptyView.setVisibility(View.GONE);
 
-        firebaseManager.getFirestore().collection("users")
-                .whereEqualTo("status", status)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    loadingProgressBar.setVisibility(View.GONE);
-                    usersList.clear();
+        firebaseManager.getFirestore().collection("users").whereEqualTo("status", status).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            loadingProgressBar.setVisibility(View.GONE);
+            usersList.clear();
 
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        String uid = document.getId();
-                        String email = document.getString("email");
-                        String firstName = document.getString("first_Name");
-                        String lastName = document.getString("last_Name");
-                        String phoneNumber = document.getString("phone_Number");
-                        String role = document.getString("role");
-                        String additionalInfo = "";
-                        if (Objects.equals(role, "STUDENT")) {
-                            additionalInfo = document.getString("program_Of_Study");
-                        } else if (Objects.equals(role, "TUTOR")) {
-                            additionalInfo = document.getString("Courses_Offered") + "\n" +
-                                    document.getString("Highest_Degree");
+            for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                String uid = document.getId();
+                String email = document.getString("email");
+                String firstName = document.getString("first_Name");
+                String lastName = document.getString("last_Name");
+                String phoneNumber = document.getString("phone_Number");
+                String role = document.getString("role");
+                String additionalInfo = "";
+                if (Objects.equals(role, "STUDENT")) {
+                    additionalInfo = document.getString("program_Of_Study");
+                } else if (Objects.equals(role, "TUTOR")) {
+                    additionalInfo = document.getString("Courses_Offered") + "\n" + document.getString("Highest_Degree");
 
-                        }
-                        usersList.add(new UserInfo(uid, email, firstName, lastName, phoneNumber, role, status,
-                                additionalInfo));
-                    }
+                }
+                usersList.add(new UserInfo(uid, email, firstName, lastName, phoneNumber, role, status, additionalInfo));
+            }
 
-                    if (usersList.isEmpty()) {
-                        emptyView.setVisibility(View.VISIBLE);
-                    } else {
-                        userAdapter.notifyDataSetChanged();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    loadingProgressBar.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), "Error loading users: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+            if (usersList.isEmpty()) {
+                emptyView.setVisibility(View.VISIBLE);
+            } else {
+                userAdapter.notifyDataSetChanged();
+            }
+        }).addOnFailureListener(e -> {
+            loadingProgressBar.setVisibility(View.GONE);
+            Toast.makeText(getContext(), "Error loading users: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        });
     }
 
     private void updateUserStatus(String uid, String newStatus) {
-        firebaseManager.getFirestore().collection("users")
-                .document(uid)
-                .update("status", newStatus)
-                .addOnSuccessListener(aVoid -> {
-                    String message = "APPROVED".equals(newStatus) ? "User approved and activated"
-                            : "User status updated to " + newStatus;
-                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-                    loadUsersByStatus(showingRejected ? "REJECTED" : "PENDING");
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error updating status: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+        firebaseManager.getFirestore().collection("users").document(uid).update("status", newStatus).addOnSuccessListener(aVoid -> {
+            String message = "APPROVED".equals(newStatus) ? "User approved and activated" : "User status updated to " + newStatus;
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+            loadUsersByStatus(showingRejected ? "REJECTED" : "PENDING");
+        }).addOnFailureListener(e -> {
+            Toast.makeText(getContext(), "Error updating status: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        });
     }
 
     private static class UserInfo {
@@ -181,8 +168,7 @@ public class fragment_admin extends Fragment {
         String status;
         String additionalInfo;
 
-        UserInfo(String uid, String email, String firstName, String lastName, String phoneNumber, String role,
-                 String status, String additionalInfo) {
+        UserInfo(String uid, String email, String firstName, String lastName, String phoneNumber, String role, String status, String additionalInfo) {
             this.uid = uid;
             this.email = email;
             this.firstName = firstName;

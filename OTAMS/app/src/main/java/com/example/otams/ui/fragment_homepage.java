@@ -29,12 +29,20 @@ public class fragment_homepage extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentHomepageBinding.inflate(inflater, container, false);
         firebaseManager = FirebaseManager.getInstance();
         requireActivity().setTitle("Home");
         return binding.getRoot();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        firebaseManager.signOut();
+        NavController navController = Navigation.findNavController(requireView());
+        navController.navigate(R.id.loginFragment);
+
     }
 
 
@@ -70,46 +78,42 @@ public class fragment_homepage extends Fragment {
             return;
         }
 
-        firebaseManager.getFirestore().collection("users")
-                .document(firebaseManager.getCurrentUser().getUid())
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        UserRole role = UserRole.valueOf(documentSnapshot.getString("role"));
-                        UserStatus status = UserStatus.valueOf(documentSnapshot.getString("status"));
-                        String email = documentSnapshot.getString("username");
+        firebaseManager.getFirestore().collection("users").document(firebaseManager.getCurrentUser().getUid()).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                UserRole role = UserRole.valueOf(documentSnapshot.getString("role"));
+                UserStatus status = UserStatus.valueOf(documentSnapshot.getString("status"));
+                String email = documentSnapshot.getString("username");
 
-                        if (status == UserStatus.APPROVED) {
+                if (status == UserStatus.APPROVED) {
 
-                            if (role == UserRole.ADMIN) {
-                                NavController navController = Navigation.findNavController(requireView());
-                                navController.navigate(R.id.action_fragment_homepage_to_adminFragment);
-                            }
-
-                            if (role == UserRole.TUTOR) {
-                                NavController navController = Navigation.findNavController(requireView());
-                                navController.navigate(R.id.action_fragment_homepage_to_fragment_tutor);
-                            }
-
-                            if (role == UserRole.STUDENT) {
-                                NavController navController = Navigation.findNavController(requireView());
-                                navController.navigate(R.id.action_fragment_homepage_to_fragment_tutor);
-                            }
-                        } else {
-                            binding.centerText.setText(String.format("%s%s%s", getString(R.string.your_account), status, getString(R.string.contact_admin)));
-                        }
-
-
-                    } else {
-                        // Document does not exist
-                        binding.centerText.setText(R.string.user_data_not_found_contact_admin);
+                    if (role == UserRole.ADMIN) {
+                        NavController navController = Navigation.findNavController(requireView());
+                        navController.navigate(R.id.action_fragment_homepage_to_adminFragment);
                     }
-                })
-                .addOnFailureListener(e -> {
-                    // Handle error
-                    Toast.makeText(requireContext(), "Error fetching user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    return;
-                });
+
+                    if (role == UserRole.TUTOR) {
+                        NavController navController = Navigation.findNavController(requireView());
+                        navController.navigate(R.id.action_fragment_homepage_to_fragment_tutor);
+                    }
+
+                    if (role == UserRole.STUDENT) {
+                        NavController navController = Navigation.findNavController(requireView());
+                        navController.navigate(R.id.action_fragment_homepage_to_fragment_tutor);
+                    }
+                } else {
+                    binding.centerText.setText(String.format("%s%s%s", getString(R.string.your_account), status, getString(R.string.contact_admin)));
+                }
+
+
+            } else {
+                // Document does not exist
+                binding.centerText.setText(R.string.user_data_not_found_contact_admin);
+            }
+        }).addOnFailureListener(e -> {
+            // Handle error
+            Toast.makeText(requireContext(), "Error fetching user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            return;
+        });
 
     }
 }

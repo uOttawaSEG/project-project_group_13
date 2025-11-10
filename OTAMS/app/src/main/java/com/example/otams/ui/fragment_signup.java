@@ -32,9 +32,7 @@ public class fragment_signup extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentSignupBinding.inflate(inflater, container, false);
         requireActivity().setTitle("Register");
         firebaseManager = FirebaseManager.getInstance();
@@ -118,14 +116,10 @@ public class fragment_signup extends Fragment {
         String email = binding.email.getText().toString().trim();
         String password = binding.password.getText().toString().trim();
 
-        boolean commonValid = !first.isEmpty() && !last.isEmpty() && !email.isEmpty()
-                && !password.isEmpty() && !phone.isEmpty();
+        boolean commonValid = !first.isEmpty() && !last.isEmpty() && !email.isEmpty() && !password.isEmpty() && !phone.isEmpty();
 
-        boolean studentValid = isStudent
-                && !binding.program.getText().toString().trim().isEmpty();
-        boolean tutorValid = !isStudent
-                && !binding.coursesOffered.getText().toString().trim().isEmpty()
-                && !binding.highestDegree.getText().toString().trim().isEmpty();
+        boolean studentValid = isStudent && !binding.program.getText().toString().trim().isEmpty();
+        boolean tutorValid = !isStudent && !binding.coursesOffered.getText().toString().trim().isEmpty() && !binding.highestDegree.getText().toString().trim().isEmpty();
 
         binding.registerButton.setEnabled(commonValid && (studentValid || tutorValid));
     }
@@ -157,23 +151,18 @@ public class fragment_signup extends Fragment {
         firebaseManager.signUp(email, password, task -> {
             if (task.isSuccessful()) {
                 String uid = Objects.requireNonNull(task.getResult().getUser()).getUid();
-                firebaseManager.saveUserProfile(uid, userProfile,
-                        aVoid -> {
-                            binding.loading.setVisibility(View.GONE);
-                            Toast.makeText(getContext(),
-                                    "Registration successful. Wait for approval.", Toast.LENGTH_LONG).show();
-                            NavController navController = Navigation.findNavController(requireView());
-                            navController.navigate(R.id.loginFragment);
-                        },
-                        e -> {
-                            binding.loading.setVisibility(View.GONE);
-                            Toast.makeText(getContext(),
-                                    "Failed to save user profile: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        });
+                firebaseManager.saveUserProfile(uid, userProfile, aVoid -> {
+                    binding.loading.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "Registration successful. Wait for approval.", Toast.LENGTH_LONG).show();
+                    NavController navController = Navigation.findNavController(requireView());
+                    navController.navigate(R.id.loginFragment);
+                }, e -> {
+                    binding.loading.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "Failed to save user profile: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
             } else {
                 binding.loading.setVisibility(View.GONE);
-                Toast.makeText(getContext(),
-                        "Registration failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Registration failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
