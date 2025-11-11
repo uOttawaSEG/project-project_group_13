@@ -1,14 +1,15 @@
 package com.example.otams.data;
 
-import java.time.LocalDateTime;
+import com.google.firebase.Timestamp;
+
+import java.util.ArrayList;
 
 public class Tutor extends Client {
 
     private String highest_degree;
     private String Courses_Offered;
 
-    public Tutor(String Email, String Password, String First_Name, String Last_Name, String Phone_Number,
-                 LocalDateTime Future_Session, LocalDateTime Past_Session, String highest_degree, String Courses_Offered) {
+    public Tutor(String Email, String Password, String First_Name, String Last_Name, String Phone_Number, ArrayList<String> Future_Session, ArrayList<String> Past_Session, String highest_degree, String Courses_Offered) {
         super(Email, Password, First_Name, Last_Name, Phone_Number, Future_Session, Past_Session);
 
         this.highest_degree = highest_degree;
@@ -16,14 +17,15 @@ public class Tutor extends Client {
         setRole(UserRole.TUTOR);
     }
 
-    public Tutor(String Email, String Password, String First_Name, String Last_Name, String Phone_Number,
-            String highest_degree, String Courses_Offered) {
+    public Tutor(String Email, String Password, String First_Name, String Last_Name, String Phone_Number, String highest_degree, String Courses_Offered) {
         super(Email, Password, First_Name, Last_Name, Phone_Number);
         this.highest_degree = highest_degree;
         this.Courses_Offered = Courses_Offered;
         setRole(UserRole.TUTOR);
     }
-
+    public Tutor() {
+        super();
+    }
     public String getHighest_degree() {
         return highest_degree;
     }

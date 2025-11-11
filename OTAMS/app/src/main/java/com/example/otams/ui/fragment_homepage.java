@@ -2,9 +2,6 @@ package com.example.otams.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -12,7 +9,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -46,26 +42,7 @@ public class fragment_homepage extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        requireActivity().addMenuProvider(new MenuProvider() {
-            @Override
-            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
-                // Inflate your menu here
-                menuInflater.inflate(R.menu.menu, menu);
-            }
-
-            @Override
-            public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
-                if (menuItem.getItemId() == R.id.action_logout) {
-                    // Handle logout click
-                    firebaseManager.signOut();
-                    NavController navController = Navigation.findNavController(requireView());
-                    navController.navigate(R.id.loginFragment);
-                    Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                return false;
-            }
-        }, getViewLifecycleOwner());
+        MenuUtils.setupLogoutMenu(this, firebaseManager);
 
         TextView centerText = view.findViewById(R.id.centerText);
 
@@ -112,4 +89,11 @@ public class fragment_homepage extends Fragment {
         });
 
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null; // assuming you're using ViewBinding
+    }
+
 }

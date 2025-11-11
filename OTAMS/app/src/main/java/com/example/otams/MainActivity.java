@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = navHostFragment.getNavController();
 
         // AppBarConfiguration: define which fragments have no back button
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(R.id.loginFragment).build();
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(R.id.loginFragment, R.id.fragment_signup, R.id.fragment_homepage, R.id.fragment_admin, R.id.fragment_tutor, R.id.fragment_student).build();
 
         // Connect toolbar with NavController and AppBarConfiguration
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);

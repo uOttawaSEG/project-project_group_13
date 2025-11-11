@@ -1,20 +1,24 @@
 package com.example.otams.data;
 
-import java.time.LocalDateTime;
+import com.google.firebase.Timestamp;
+
+import java.util.ArrayList;
 
 public class Student extends Client {
 
     private String program_of_study;
 
-    public Student(String Email, String Password, String First_Name, String Last_Name, String Phone_Number,
-                   LocalDateTime Future_Session, LocalDateTime  Past_Session, String program_of_study) {
+    public Student(){
+        super();
+    }
+
+    public Student(String Email, String Password, String First_Name, String Last_Name, String Phone_Number, ArrayList<String> Future_Session, ArrayList<String> Past_Session, String program_of_study) {
         super(Email, Password, First_Name, Last_Name, Phone_Number, Future_Session, Past_Session);
         this.program_of_study = program_of_study;
         setRole(UserRole.STUDENT);
     }
 
-    public Student(String Email, String Password, String First_Name, String Last_Name, String Phone_Number,
-            String program_of_study) {
+    public Student(String Email, String Password, String First_Name, String Last_Name, String Phone_Number, String program_of_study) {
         super(Email, Password, First_Name, Last_Name, Phone_Number);
         this.program_of_study = program_of_study;
         setRole(UserRole.STUDENT);

@@ -1,68 +1,113 @@
 package com.example.otams.data;
 
-import java.time.LocalDateTime;
+import com.google.firebase.Timestamp;
+
 import java.util.ArrayList;
 
 public class Session {
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private String tutorID;
-    private ArrayList<String> studentID;
 
-    public Session(LocalDateTime startTime, LocalDateTime endTime, String tutorID) {
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.tutorID = tutorID;
+    private boolean auto_approve;
+    private String location;
+    private String course_code;
+    private Timestamp start_time;
+    private Timestamp end_time;
+    private String tutor_id;
+    private ArrayList<String> students;
+    private String sessionID;
+
+    public Session(String course_code, boolean auto_approve, String location, Timestamp start_time, Timestamp end_time, String tutorID) {
+        this.start_time = start_time;
+        this.end_time = end_time;
+        this.tutor_id = tutorID;
+        this.course_code = course_code;
+        this.auto_approve = auto_approve;
+        this.location = location;
+        this.students = new ArrayList<>();
     }
 
     public Session() {
-        //default Constructor
+
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
+    public Session(String tutorID) {
+        this.tutor_id = tutorID;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
+    public String getSessionId() {
+        return sessionID;
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
+    public String setSessionId(String session_id) {
+        return this.sessionID = session_id;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
+    public boolean isAutoApprove() {
+        return auto_approve;
     }
 
-    public String getTutorID() {
-        return tutorID;
+    public void setAutoApprove(boolean auto_approve) {
+        this.auto_approve = auto_approve;
     }
 
-    public void setTutorID(String tutorID) {
-        this.tutorID = tutorID;
+    public String getLocation() {
+        return location;
     }
 
-    public ArrayList<String> getStudentID() {
-        return studentID;
+    public void setLocation(String location) {
+        this.location = location;
     }
 
-    public void setStudentID(ArrayList<String> studentID) {
-        this.studentID = studentID;
+    public String getCourseCode() {
+        return course_code;
     }
 
-    public void addStudent(String studentID) {
-        if (this.studentID == null) {
-            this.studentID = new ArrayList<>();
+    public void setCourseCode(String course_code) {
+        this.course_code = course_code;
+    }
+
+    public Timestamp getStartTime() {
+        return start_time;
+    }
+
+    public void setStartTime(Timestamp startTime) {
+        this.start_time = startTime;
+    }
+
+    public Timestamp getEndTime() {
+        return end_time;
+    }
+
+    public void setEndTime(Timestamp endTime) {
+        this.end_time = endTime;
+    }
+
+    public String getTutor() {
+        return tutor_id;
+    }
+
+    public void setTutor(String tutor) {
+        this.tutor_id = tutor;
+    }
+
+    public ArrayList<String> getStudents() {
+        return students;
+    }
+
+    public void setStudents(ArrayList<String> students) {
+        this.students = students;
+    }
+
+    public void addStudent(String student) {
+        if (this.students == null) {
+            this.students = new ArrayList<>();
         }
-        this.studentID.add(studentID);
+        this.students.add(student);
     }
 
-    public void removeStudent(String studentID) {
-        if (this.studentID != null) {
-            this.studentID.remove(studentID);
+    public void removeStudent(String student) {
+        if (this.students != null) {
+            this.students.remove(student);
         }
     }
-
 
 }
