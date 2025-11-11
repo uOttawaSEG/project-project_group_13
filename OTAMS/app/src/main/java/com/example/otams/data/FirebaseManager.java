@@ -85,34 +85,41 @@ public class FirebaseManager {
     }
 
     public void fetchPastSessions(SessionFetchCallback callback) {
-        firestore.collection("sessions").whereEqualTo("tutor", getCurrentUser().getUid()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-            List<Session> sessions = new ArrayList<>();
-            for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                Session session = doc.toObject(Session.class);
-                if (session.getStartTime().compareTo(Timestamp.now()) < 0) {
-                    sessions.add(session);
-                }
-            }
-            // Handle fetched sessions
-        }).addOnFailureListener(e -> {
-            Log.e("Firestore", "Query failed", e);
-        });
+        firestore.collection("sessions")
+                .whereEqualTo("tutor", getCurrentUser().getUid())
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Session> sessions = new ArrayList<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Session session = doc.toObject(Session.class);
+                        if (session != null && session.getStartTime() != null &&
+                                session.getStartTime().compareTo(Timestamp.now()) < 0) {
+                            sessions.add(session);
+                        }
+                    }
+                    callback.onSessionsFetched(sessions);
+                })
+                .addOnFailureListener(callback::onError);
     }
 
     public void fetchFutureSessions(SessionFetchCallback callback) {
-        firestore.collection("sessions").whereEqualTo("tutor", getCurrentUser().getUid()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-            List<Session> sessions = new ArrayList<>();
-            for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                Session session = doc.toObject(Session.class);
-                if (session.getStartTime().compareTo(Timestamp.now()) < 0) {
-                    sessions.add(session);
-                }
-            }
-            // Handle fetched sessions
-        }).addOnFailureListener(e -> {
-            Log.e("Firestore", "Query failed", e);
-        });
+        firestore.collection("sessions")
+                .whereEqualTo("tutor", getCurrentUser().getUid())
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Session> sessions = new ArrayList<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Session session = doc.toObject(Session.class);
+                        if (session != null && session.getStartTime() != null &&
+                                session.getStartTime().compareTo(Timestamp.now()) > 0) {
+                            sessions.add(session);
+                        }
+                    }
+                    callback.onSessionsFetched(sessions);
+                })
+                .addOnFailureListener(callback::onError);
     }
+
 
     public FirebaseUser getCurrentUser() {
         return auth.getCurrentUser();

@@ -65,7 +65,7 @@ public class fragment_tutor extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //MenuUtils.setupLogoutMenu(this, firebaseManager);
+        MenuUtils.setupLogoutMenu(this, firebaseManager);
     }
 
     private void setupRadioGroupListener() {
