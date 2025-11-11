@@ -7,7 +7,6 @@ import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 
-
 public class Session {
 
     private boolean auto_approve;
