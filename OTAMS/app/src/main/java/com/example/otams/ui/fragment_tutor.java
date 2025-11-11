@@ -48,7 +48,8 @@ public class fragment_tutor extends Fragment {
     private SessionAdapter adapter;
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         binding = FragmentTutorBinding.inflate(inflater, container, false);
         requireActivity().setTitle("Tutor");
 
@@ -73,9 +74,11 @@ public class fragment_tutor extends Fragment {
             if (checkedId == R.id.radio_pending) {
                 // Show past sessions
                 adapter.updateData(past_sessions);
+                loadSessions();
             } else if (checkedId == R.id.radio_rejected) {
                 // Show future sessions
                 adapter.updateData(future_sessions);
+                loadSessions();
             }
         });
     }
@@ -115,7 +118,6 @@ public class fragment_tutor extends Fragment {
         });
     }
 
-
     private void setupCreateAvailabilityButton() {
         binding.createAvailabilityButton.setOnClickListener(v -> showCreateAvailabilityDialog());
     }
@@ -141,9 +143,9 @@ public class fragment_tutor extends Fragment {
         binding.pastSessionsList.setLayoutManager(new LinearLayoutManager(requireContext()));
     }
 
-
     private void onSessionClicked(Session session) {
-        //Toast.makeText(requireContext(), "Clicked session: " + session.getCourse(), Toast.LENGTH_SHORT).show();
+        // Toast.makeText(requireContext(), "Clicked session: " + session.getCourse(),
+        // Toast.LENGTH_SHORT).show();
         // TODO: Open session details or do something with the clicked session
     }
 
@@ -155,45 +157,45 @@ public class fragment_tutor extends Fragment {
             return;
         }
 
-        firebaseManager.getFirestore().collection("users").whereIn(FieldPath.documentId(), studentIds).get().addOnSuccessListener(querySnapshot -> {
-            List<String> studentNames = new ArrayList<>();
+        firebaseManager.getFirestore().collection("users").whereIn(FieldPath.documentId(), studentIds).get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<String> studentNames = new ArrayList<>();
 
-            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                String firstName = doc.getString("first_Name");
-                String lastName = doc.getString("last_Name");
-                String email = doc.getString("username");
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        String firstName = doc.getString("first_Name");
+                        String lastName = doc.getString("last_Name");
+                        String email = doc.getString("username");
 
-                // Combine nicely even if one part is missing
-                String displayName;
-                if (firstName != null && lastName != null) {
-                    displayName = firstName + " " + lastName;
-                } else if (firstName != null) {
-                    displayName = firstName;
-                } else {
-                    displayName = email != null ? email : "Unknown Student";
-                }
+                        // Combine nicely even if one part is missing
+                        String displayName;
+                        if (firstName != null && lastName != null) {
+                            displayName = firstName + " " + lastName;
+                        } else if (firstName != null) {
+                            displayName = firstName;
+                        } else {
+                            displayName = email != null ? email : "Unknown Student";
+                        }
 
-                studentNames.add(displayName);
-            }
+                        studentNames.add(displayName);
+                    }
 
-            if (studentNames.isEmpty()) {
-                Toast.makeText(requireContext(), "No valid student records found.", Toast.LENGTH_SHORT).show();
-                return;
-            }
+                    if (studentNames.isEmpty()) {
+                        Toast.makeText(requireContext(), "No valid student records found.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-            // Display students in a dialog
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-            builder.setTitle("Student List");
-            builder.setItems(studentNames.toArray(new String[0]), null);
-            builder.setPositiveButton("OK", null);
-            builder.show();
+                    // Display students in a dialog
+                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                    builder.setTitle("Student List");
+                    builder.setItems(studentNames.toArray(new String[0]), null);
+                    builder.setPositiveButton("OK", null);
+                    builder.show();
 
-        }).addOnFailureListener(e -> {
-            Log.e("fragment_tutor", "Failed to load students", e);
-            Toast.makeText(requireContext(), "Failed to load student list.", Toast.LENGTH_SHORT).show();
-        });
+                }).addOnFailureListener(e -> {
+                    Log.e("fragment_tutor", "Failed to load students", e);
+                    Toast.makeText(requireContext(), "Failed to load student list.", Toast.LENGTH_SHORT).show();
+                });
     }
-
 
     private void showEditAvailabilityDialog(Session session) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -232,10 +234,12 @@ public class fragment_tutor extends Fragment {
             int month = today.get(Calendar.MONTH);
             int day = today.get(Calendar.DAY_OF_MONTH);
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), (view, selectedYear, selectedMonth, selectedDay) -> {
-                String formattedDate = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay);
-                dateInput.setText(formattedDate);
-            }, year, month, day);
+            DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
+                    (view, selectedYear, selectedMonth, selectedDay) -> {
+                        String formattedDate = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1,
+                                selectedDay);
+                        dateInput.setText(formattedDate);
+                    }, year, month, day);
 
             datePickerDialog.getDatePicker().setMinDate(today.getTimeInMillis());
             datePickerDialog.show();
@@ -247,19 +251,21 @@ public class fragment_tutor extends Fragment {
             int hour = now.get(Calendar.HOUR_OF_DAY);
             int minute = now.get(Calendar.MINUTE);
 
-            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(), (view, selectedHour, selectedMinute) -> {
-                int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
-                String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
-                startTimeInput.setText(formattedTime);
-            }, hour, minute, true);
+            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
+                    (view, selectedHour, selectedMinute) -> {
+                        int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
+                        String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
+                        startTimeInput.setText(formattedTime);
+                    }, hour, minute, true);
 
             timePickerDialog.show();
 
-            NumberPicker minutePicker = timePickerDialog.findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
+            NumberPicker minutePicker = timePickerDialog
+                    .findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
             if (minutePicker != null) {
                 minutePicker.setMinValue(0);
                 minutePicker.setMaxValue(1);
-                minutePicker.setDisplayedValues(new String[]{"00", "30"});
+                minutePicker.setDisplayedValues(new String[] { "00", "30" });
             }
         });
 
@@ -269,19 +275,21 @@ public class fragment_tutor extends Fragment {
             int hour = now.get(Calendar.HOUR_OF_DAY);
             int minute = now.get(Calendar.MINUTE);
 
-            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(), (view, selectedHour, selectedMinute) -> {
-                int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
-                String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
-                endTimeInput.setText(formattedTime);
-            }, hour, minute, true);
+            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
+                    (view, selectedHour, selectedMinute) -> {
+                        int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
+                        String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
+                        endTimeInput.setText(formattedTime);
+                    }, hour, minute, true);
 
             timePickerDialog.show();
 
-            NumberPicker minutePicker = timePickerDialog.findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
+            NumberPicker minutePicker = timePickerDialog
+                    .findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
             if (minutePicker != null) {
                 minutePicker.setMinValue(0);
                 minutePicker.setMaxValue(1);
-                minutePicker.setDisplayedValues(new String[]{"00", "30"});
+                minutePicker.setDisplayedValues(new String[] { "00", "30" });
             }
         });
 
@@ -319,9 +327,10 @@ public class fragment_tutor extends Fragment {
                 session.setEndTime(endTimestamp);
 
                 // Update Firestore document using session ID (you must have it)
-                firebaseManager.getFirestore().collection("sessions").document(session.getSessionId()) // Make sure Session has a method getId() returning Firestore document ID
+                firebaseManager.getFirestore().collection("sessions").document(session.getSessionId())
                         .set(session).addOnSuccessListener(aVoid -> {
-                            Toast.makeText(requireContext(), "Availability slot updated successfully", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), "Availability slot updated successfully",
+                                    Toast.LENGTH_SHORT).show();
                             // Refresh UI lists if needed:
                             if (binding.sessionLabel.getCheckedRadioButtonId() == R.id.radio_rejected) {
                                 adapter.updateData(future_sessions);
@@ -330,7 +339,8 @@ public class fragment_tutor extends Fragment {
                             }
                         }).addOnFailureListener(e -> {
                             e.printStackTrace();
-                            Toast.makeText(requireContext(), "Failed to update availability slot", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), "Failed to update availability slot", Toast.LENGTH_SHORT)
+                                    .show();
                         });
 
             } catch (Exception e) {
@@ -342,7 +352,6 @@ public class fragment_tutor extends Fragment {
         builder.setNegativeButton("Cancel", null);
         builder.show();
     }
-
 
     private void showCreateAvailabilityDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -370,10 +379,12 @@ public class fragment_tutor extends Fragment {
             int month = today.get(Calendar.MONTH);
             int day = today.get(Calendar.DAY_OF_MONTH);
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), (view, selectedYear, selectedMonth, selectedDay) -> {
-                String formattedDate = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay);
-                dateInput.setText(formattedDate);
-            }, year, month, day);
+            DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
+                    (view, selectedYear, selectedMonth, selectedDay) -> {
+                        String formattedDate = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1,
+                                selectedDay);
+                        dateInput.setText(formattedDate);
+                    }, year, month, day);
 
             datePickerDialog.getDatePicker().setMinDate(today.getTimeInMillis());
             datePickerDialog.show();
@@ -385,19 +396,21 @@ public class fragment_tutor extends Fragment {
             int hour = now.get(Calendar.HOUR_OF_DAY);
             int minute = now.get(Calendar.MINUTE);
 
-            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(), (view, selectedHour, selectedMinute) -> {
-                int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
-                String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
-                startTimeInput.setText(formattedTime);
-            }, hour, minute, true);
+            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
+                    (view, selectedHour, selectedMinute) -> {
+                        int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
+                        String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
+                        startTimeInput.setText(formattedTime);
+                    }, hour, minute, true);
 
             timePickerDialog.show();
 
-            NumberPicker minutePicker = timePickerDialog.findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
+            NumberPicker minutePicker = timePickerDialog
+                    .findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
             if (minutePicker != null) {
                 minutePicker.setMinValue(0);
                 minutePicker.setMaxValue(1);
-                minutePicker.setDisplayedValues(new String[]{"00", "30"});
+                minutePicker.setDisplayedValues(new String[] { "00", "30" });
             }
         });
 
@@ -407,19 +420,21 @@ public class fragment_tutor extends Fragment {
             int hour = now.get(Calendar.HOUR_OF_DAY);
             int minute = now.get(Calendar.MINUTE);
 
-            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(), (view, selectedHour, selectedMinute) -> {
-                int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
-                String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
-                endTimeInput.setText(formattedTime);
-            }, hour, minute, true);
+            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
+                    (view, selectedHour, selectedMinute) -> {
+                        int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
+                        String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
+                        endTimeInput.setText(formattedTime);
+                    }, hour, minute, true);
 
             timePickerDialog.show();
 
-            NumberPicker minutePicker = timePickerDialog.findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
+            NumberPicker minutePicker = timePickerDialog
+                    .findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
             if (minutePicker != null) {
                 minutePicker.setMinValue(0);
                 minutePicker.setMaxValue(1);
-                minutePicker.setDisplayedValues(new String[]{"00", "30"});
+                minutePicker.setDisplayedValues(new String[] { "00", "30" });
             }
         });
 
@@ -453,32 +468,39 @@ public class fragment_tutor extends Fragment {
 
                 firebaseManager.getUserProfile().addOnSuccessListener(profileObj -> {
                     if (profileObj instanceof Tutor) {
-                        Session newSession = new Session(course, autoApprove, location, startTimestamp, endTimestamp, uid);
+                        Session newSession = new Session(course, autoApprove, location, startTimestamp, endTimestamp,
+                                uid);
 
-                        firebaseManager.getFirestore().collection("sessions").add(newSession).addOnSuccessListener(documentReference -> {
-                            newSession.setSessionId(documentReference.getId());
+                        firebaseManager.getFirestore().collection("sessions").add(newSession)
+                                .addOnSuccessListener(documentReference -> {
+                                    newSession.setSessionId(documentReference.getId());
 
-                            // Update the session document itself
-                            documentReference.update("sessionId", documentReference.getId());
+                                    // Update the session document itself
+                                    documentReference.update("sessionID", documentReference.getId());
 
-                            // Also update tutor document to include this new session
-                            firebaseManager.getFirestore().collection("users").document(uid).update("future_Session", FieldValue.arrayUnion(documentReference.getId())).addOnSuccessListener(aVoid -> {
-                                Toast.makeText(requireContext(), "Availability slot created successfully", Toast.LENGTH_SHORT).show();
-                            }).addOnFailureListener(e -> {
-                                e.printStackTrace();
-                                Toast.makeText(requireContext(), "Failed to update tutor record", Toast.LENGTH_SHORT).show();
-                            });
-                        }).addOnFailureListener(e -> {
-                            e.printStackTrace();
-                            Toast.makeText(requireContext(), "Failed to create availability slot", Toast.LENGTH_SHORT).show();
-                        });
+                                    // Also update tutor document to include this new session
+                                    firebaseManager.getFirestore().collection("users").document(uid)
+                                            .update("future_Session", FieldValue.arrayUnion(documentReference.getId()))
+                                            .addOnSuccessListener(aVoid -> {
+                                                Toast.makeText(requireContext(),
+                                                        "Availability slot created successfully", Toast.LENGTH_SHORT)
+                                                        .show();
+                                            }).addOnFailureListener(e -> {
+                                                e.printStackTrace();
+                                                Toast.makeText(requireContext(), "Failed to update tutor record",
+                                                        Toast.LENGTH_SHORT).show();
+                                            });
+                                }).addOnFailureListener(e -> {
+                                    e.printStackTrace();
+                                    Toast.makeText(requireContext(), "Failed to create availability slot",
+                                            Toast.LENGTH_SHORT).show();
+                                });
                     }
                 }).addOnFailureListener(e -> {
                     Log.d("fragment_tutor", "showCreateAvailabilityDialog: " + e.getMessage());
                     e.printStackTrace();
                     Toast.makeText(requireContext(), "Error getting user profile", Toast.LENGTH_SHORT).show();
                 });
-
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -549,21 +571,25 @@ public class fragment_tutor extends Fragment {
                 tvDate.setText(dateStr);
 
                 SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                String timeRange = timeFormat.format(session.getStartTime().toDate()) + " - " + timeFormat.format(session.getEndTime().toDate());
+                String timeRange = timeFormat.format(session.getStartTime().toDate()) + " - "
+                        + timeFormat.format(session.getEndTime().toDate());
                 tvTime.setText(timeRange);
 
                 tvLocation.setText(session.getLocation());
 
                 itemView.setOnClickListener(v -> {
-                    if (listener != null) listener.onItemClick(session);
+                    if (listener != null)
+                        listener.onItemClick(session);
                 });
 
                 btnStudentList.setOnClickListener(v -> {
-                    if (listener != null) listener.onStudentListClick(session);
+                    if (listener != null)
+                        listener.onStudentListClick(session);
                 });
 
                 btnEdit.setOnClickListener(v -> {
-                    if (listener != null) listener.onEditClick(session);
+                    if (listener != null)
+                        listener.onEditClick(session);
                 });
             }
         }

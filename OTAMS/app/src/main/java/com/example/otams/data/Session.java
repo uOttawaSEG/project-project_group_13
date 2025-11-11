@@ -4,7 +4,6 @@ import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 
-
 public class Session {
 
     private boolean auto_approve;
@@ -14,8 +13,7 @@ public class Session {
     private Timestamp end_time;
     private String tutor_id;
     private ArrayList<String> students;
-
-    private String session_id;
+    private String sessionID;
 
     public Session(String course_code, boolean auto_approve, String location, Timestamp start_time, Timestamp end_time, String tutorID) {
         this.start_time = start_time;
@@ -28,8 +26,7 @@ public class Session {
     }
 
     public Session() {
-        // default Constructor
-        this.students = new ArrayList<>();
+
     }
 
     public Session(String tutorID) {
@@ -37,11 +34,11 @@ public class Session {
     }
 
     public String getSessionId() {
-        return session_id;
+        return sessionID;
     }
 
     public String setSessionId(String session_id) {
-        return this.session_id = session_id;
+        return this.sessionID = session_id;
     }
 
     public boolean isAutoApprove() {

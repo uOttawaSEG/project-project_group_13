@@ -94,6 +94,7 @@ public class FirebaseManager {
                         Session session = doc.toObject(Session.class);
                         if (session != null && session.getStartTime() != null &&
                                 session.getStartTime().compareTo(Timestamp.now()) < 0) {
+                            session.setSessionId(doc.getId());
                             sessions.add(session);
                         }
                     }
@@ -112,6 +113,7 @@ public class FirebaseManager {
                         Session session = doc.toObject(Session.class);
                         if (session != null && session.getStartTime() != null &&
                                 session.getStartTime().compareTo(Timestamp.now()) > 0) {
+                            session.setSessionId(doc.getId());
                             sessions.add(session);
                         }
                     }
