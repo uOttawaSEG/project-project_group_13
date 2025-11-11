@@ -150,12 +150,6 @@ public class fragment_admin extends Fragment {
         });
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null; // assuming you're using ViewBinding
-    }
-
     private static class UserInfo {
         String uid;
         String email;

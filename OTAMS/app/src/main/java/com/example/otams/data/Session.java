@@ -5,6 +5,8 @@ import com.google.firebase.Timestamp;
 import java.util.ArrayList;
 import com.google.firebase.Timestamp;
 
+import java.util.ArrayList;
+
 
 public class Session {
 
