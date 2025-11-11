@@ -1,0 +1,162 @@
+@startuml OTAMS_UML_Diagram
+
+skinparam classAttributeIconSize 0
+
+class MainActivity {
+    - toolbar: MaterialToolbar
+    - navController: NavController
+    + onCreate(Bundle): void
+    + onSupportNavigateUp(): boolean
+}
+
+class fragment_signup {
+    - firebaseManager: FirebaseManager
+    - binding: FragmentSignupBinding
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+    + handleSignup(): void
+}
+
+class fragment_tutor {
+    - future_sessions: ArrayList<Session>
+    - past_sessions: ArrayList<Session>
+    - firebaseManager: FirebaseManager
+    - binding: FragmentTutorBinding
+    - adapter: SessionAdapter
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+    + showEditAvailabilityDialog(Session): void
+    + showCreateAvailabilityDialog(): void
+}
+
+class FirebaseManager {
+    - auth: FirebaseAuth
+    - firestore: FirebaseFirestore
+    + getInstance(): FirebaseManager
+    + fetchPastSessions(SessionFetchCallback): void
+    + fetchFutureSessions(SessionFetchCallback): void
+    + getUserProfile(): Task<Object>
+}
+
+class Session {
+    - sessionId: String
+    - startTime: Timestamp
+    - endTime: Timestamp
+    - courseCode: String
+    - location: String
+    - autoApprove: boolean
+    + getSessionId(): String
+    + setSessionId(String): void
+}
+
+class Tutor {
+    - name: String
+    - email: String
+    + getName(): String
+    + getEmail(): String
+}
+
+class SessionAdapter {
+    - sessions: List<Session>
+    - listener: OnItemClickListener
+    + updateData(List<Session>): void
+    + onBindViewHolder(SessionViewHolder, int): void
+}
+
+class fragment_student {
+    - firebaseManager: FirebaseManager
+    - binding: FragmentStudentBinding
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+    + showSessionRequestDialog(): void
+}
+
+class fragment_login {
+    - firebaseManager: FirebaseManager
+    - binding: FragmentLoginBinding
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+    + validateForm(): void
+}
+
+class fragment_homepage {
+    - firebaseManager: FirebaseManager
+    - binding: FragmentHomepageBinding
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+    + showHomepageContent(): void
+}
+
+class fragment_admin {
+    - firebaseManager: FirebaseManager
+    - binding: FragmentAdminBinding
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+    + loadUsersByStatus(String): void
+}
+
+class Client {
+    - first_name: String
+    - last_name: String
+    - phone_number: String
+    - future_session: ArrayList<String>
+    - past_session: ArrayList<String>
+    + getFirst_name(): String
+    + setFirst_name(String): void
+    + getLast_name(): String
+    + setLast_name(String): void
+    + getPhone_number(): String
+    + setPhone_number(String): void
+}
+
+class Student {
+    - program_of_study: String
+    + getProgram_of_study(): String
+    + setProgram_of_study(String): void
+}
+
+class User {
+    - username: String
+    - password: String
+    - role: UserRole
+    - status: UserStatus
+    + getUsername(): String
+    + getPassword(): String
+    + getRole(): UserRole
+    + setRole(UserRole): void
+    + getStatus(): UserStatus
+    + setStatus(UserStatus): void
+}
+
+class Admin {
+    + accept(): void
+    + reject(): void
+}
+
+class UserRole {
+    <<enumeration>>
+    ADMIN
+    TUTOR
+    STUDENT
+}
+
+class UserStatus {
+    <<enumeration>>
+    APPROVED
+    PENDING
+    REJECTED
+}
+
+MainActivity --> fragment_login : Navigates
+fragment_homepage --> fragment_student : Navigates
+fragment_homepage --> fragment_tutor : Navigates
+fragment_login --> fragment_signup : Navigates
+fragment_login --> fragment_homepage : Navigates
+fragment_tutor --> FirebaseManager : Uses
+fragment_student --> FirebaseManager : Uses
+fragment_login --> FirebaseManager : Uses
+fragment_homepage --> FirebaseManager : Uses
+fragment_admin --> FirebaseManager : Uses
+fragment_tutor --> SessionAdapter : Displays
+SessionAdapter --> Session : Binds
+FirebaseManager --> Session : Manages
+FirebaseManager --> Tutor : Manages
+Client <|-- Student
+Client <|-- Tutor
+User <|-- Admin
+
+@enduml
