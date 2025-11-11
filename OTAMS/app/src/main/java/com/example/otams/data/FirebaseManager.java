@@ -5,6 +5,8 @@ import android.util.Log;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -14,6 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FirebaseManager {
     private static FirebaseManager instance;
@@ -56,6 +59,61 @@ public class FirebaseManager {
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(listener);
     }
 
+    public Task<Object> getUserProfile() {
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser == null) {
+            return Tasks.forException(new Exception("User not logged in"));
+        }
+        String uid = currentUser.getUid();
+
+        return firestore.collection("users").document(uid).get().continueWith(task -> {
+            if (!task.isSuccessful() || task.getResult() == null) {
+                throw task.getException() != null ? task.getException() : new Exception("Failed to get document");
+            }
+            DocumentSnapshot document = task.getResult();
+            if (!document.exists()) {
+                throw new Exception("User profile does not exist");
+            }
+            String role = document.getString("role");
+            if ("TUTOR".equalsIgnoreCase(role)) {
+                return document.toObject(Tutor.class);
+            } else if ("STUDENT".equalsIgnoreCase(role)) {
+                return document.toObject(Student.class);
+            }
+            throw new Exception("Unknown user role");
+        });
+    }
+
+    public void fetchPastSessions(SessionFetchCallback callback) {
+        firestore.collection("sessions").whereEqualTo("tutor", getCurrentUser().getUid()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            List<Session> sessions = new ArrayList<>();
+            for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                Session session = doc.toObject(Session.class);
+                if (session.getStartTime().compareTo(Timestamp.now()) < 0) {
+                    sessions.add(session);
+                }
+            }
+            // Handle fetched sessions
+        }).addOnFailureListener(e -> {
+            Log.e("Firestore", "Query failed", e);
+        });
+    }
+
+    public void fetchFutureSessions(SessionFetchCallback callback) {
+        firestore.collection("sessions").whereEqualTo("tutor", getCurrentUser().getUid()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            List<Session> sessions = new ArrayList<>();
+            for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                Session session = doc.toObject(Session.class);
+                if (session.getStartTime().compareTo(Timestamp.now()) < 0) {
+                    sessions.add(session);
+                }
+            }
+            // Handle fetched sessions
+        }).addOnFailureListener(e -> {
+            Log.e("Firestore", "Query failed", e);
+        });
+    }
+
     public FirebaseUser getCurrentUser() {
         return auth.getCurrentUser();
     }
@@ -94,5 +152,11 @@ public class FirebaseManager {
             }
         }).addOnFailureListener(e -> Log.e("Firestore", "Error loading sessions", e));
         return pastSessions;
+    }
+
+    public interface SessionFetchCallback {
+        void onSessionsFetched(List<Session> sessions);
+
+        void onError(Exception e);
     }
 }

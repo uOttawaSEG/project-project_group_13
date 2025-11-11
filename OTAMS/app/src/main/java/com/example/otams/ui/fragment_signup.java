@@ -232,11 +232,4 @@ public class fragment_signup extends Fragment {
             }
         });
     }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null; // avoid memory leaks
-    }
-
 }

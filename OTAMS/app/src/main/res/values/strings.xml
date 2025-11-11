@@ -50,5 +50,14 @@
     <string name="criteria_pending">PENDING</string>
     <string name="criteria_rejected">REJECTED</string>
     <string name="no_data_available">No data available.</string>
+    <string name="past_sessions">Past Sessions</string>
+    <string name="future_sessions">Future Sessions</string>
+    <string name="date">Date:</string>
+    <string name="time">Time:</string>
+    <string name="location">Location</string>
+    <string name="start_time_e_g_08_00">Start Time (e.g. 08:00)</string>
+    <string name="date_yyyy_mm_dd">Date (YYYY-MM-DD)</string>
+    <string name="end_time_e_g_08_30">End Time (e.g. 08:30)</string>
+    <string name="auto_approve_session_requests">Auto-approve session requests</string>
 
 </resources>

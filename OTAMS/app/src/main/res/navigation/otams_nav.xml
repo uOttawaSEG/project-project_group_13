@@ -64,7 +64,7 @@
         android:id="@+id/fragment_tutor"
         android:name="com.example.otams.ui.fragment_tutor"
         android:label="fragment_tutor_list"
-        tools:layout="@layout/fragment_tutor_list" >
+        tools:layout="@layout/fragment_tutor_student0list" >
         <action
             android:id="@+id/action_fragment_tutor_to_loginFragment"
             app:destination="@id/loginFragment" />

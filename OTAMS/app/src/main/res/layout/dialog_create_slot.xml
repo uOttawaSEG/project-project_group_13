@@ -1,0 +1,61 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Date picker (you can implement as a button or EditText that shows DatePickerDialog) -->
+    <EditText
+        android:id="@+id/dateInput"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:clickable="true"
+        android:focusable="false"
+        android:hint="Select Date"
+        android:padding="12dp" />
+
+    <EditText
+        android:id="@+id/startTimeInput"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:clickable="true"
+        android:focusable="false"
+        android:hint="Select Start Time"
+        android:padding="12dp" />
+
+    <EditText
+        android:id="@+id/endTimeInput"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:clickable="true"
+        android:focusable="false"
+        android:hint="Select End Time"
+        android:padding="12dp" />
+
+
+    <!-- Location input -->
+    <EditText
+        android:id="@+id/locationInput"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="@string/location"
+        android:inputType="textPostalAddress"
+        android:padding="12dp" />
+
+    <!-- Subject input -->
+    <EditText
+        android:id="@+id/subjectInput"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Subject"
+        android:inputType="text"
+        android:padding="12dp" />
+
+    <CheckBox
+        android:id="@+id/autoApproveCheck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/auto_approve_session_requests" />
+
+</LinearLayout>

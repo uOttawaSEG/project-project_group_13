@@ -1,8 +1,5 @@
 package com.example.otams.data;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 public class User {
     private String username;
     private String password;
@@ -13,6 +10,9 @@ public class User {
     public User(String username, String password) {
         this.username = username;
         this.password = password;
+    }
+
+    public User() {
     }
 
     public String getUsername() {
@@ -34,6 +34,7 @@ public class User {
     public UserStatus getStatus() {
         return status;
     }
+
     public void setStatus(UserStatus status) {
         this.status = status;
     }
