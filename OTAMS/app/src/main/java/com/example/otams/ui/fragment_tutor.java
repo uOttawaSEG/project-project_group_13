@@ -56,7 +56,7 @@ public class fragment_tutor extends Fragment {
         requireActivity().setTitle("Tutor");
 
         firebaseManager = FirebaseManager.getInstance();
-        Log.d("fragment_tutor", "onCreateView: " + firebaseManager);
+        Log.d("fragment_tutor", "onCreateView: FirebaseManager initialized");
 
         setupCreateAvailabilityButton();
         setupRecyclerView();
