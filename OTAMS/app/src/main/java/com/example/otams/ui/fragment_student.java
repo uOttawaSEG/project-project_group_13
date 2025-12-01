@@ -24,7 +24,7 @@ import com.example.otams.data.Session;
 import com.example.otams.databinding.FragmentStudentBinding;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.sql.Date;
+import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
