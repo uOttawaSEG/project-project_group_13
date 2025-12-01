@@ -23,7 +23,7 @@ public class Session implements Parcelable {
             return new Session[size];
         }
     };
-    public boolean isCancelled;
+    private boolean isCancelled;
     private String sessionId;
     private String courseCode;
     private String location;
