@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms.google.services)
@@ -55,7 +57,20 @@ dependencies {
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.navigation.ui)
     implementation(libs.androidx.cardview)
+    implementation(libs.ext.junit)
+
     testImplementation(libs.junit)
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.test:core:1.7.0")
+    androidTestImplementation("androidx.test:rules:1.5.0")
+    testImplementation(libs.espresso.core)
+    testImplementation(libs.ext.junit)
+    testImplementation("androidx.test:core:1.7.0") // Core AndroidX testing library
+    testImplementation("org.robolectric:robolectric:4.16") // To run Android framework code on the JVM
+
+
+
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }

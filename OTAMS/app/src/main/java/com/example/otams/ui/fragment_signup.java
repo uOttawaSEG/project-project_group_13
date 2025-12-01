@@ -11,6 +11,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -57,15 +59,46 @@ public class fragment_signup extends Fragment {
 
         // Handle role switch visibility
         binding.roleGroup.setOnCheckedChangeListener((group, checkedId) -> {
+
             if (checkedId == R.id.radio_student) {
                 binding.studentFields.setVisibility(View.VISIBLE);
                 binding.tutorFields.setVisibility(View.GONE);
+
             } else if (checkedId == R.id.radio_tutor) {
                 binding.studentFields.setVisibility(View.GONE);
                 binding.tutorFields.setVisibility(View.VISIBLE);
             }
+
+
+            ConstraintLayout layout = (ConstraintLayout) binding.formContent; // form_content ConstraintLayout
+            ConstraintSet set = new ConstraintSet();
+            set.clone(layout);
+
+            set.clear(R.id.register_button, ConstraintSet.TOP);
+
+            if (checkedId == R.id.radio_student) {
+                set.connect(R.id.register_button, ConstraintSet.TOP, R.id.student_fields, ConstraintSet.BOTTOM, 16);
+            } else if (checkedId == R.id.radio_tutor) {
+                set.connect(R.id.register_button, ConstraintSet.TOP, R.id.tutor_fields, ConstraintSet.BOTTOM, 16);
+            }
+
+            // Keep horizontal centering
+            set.connect(R.id.register_button, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, 0);
+            set.connect(R.id.register_button, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, 0);
+
+            // Important: Do NOT connect BOTTOM constraint here since it conflicts with dynamic TOP constraint
+            // set.connect(R.id.register_button, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM, 0);
+
+            set.applyTo(layout);
+
+            // Force layout update
+            layout.requestLayout();
+            layout.invalidate();
+
+
             validateForm(); // recheck button state
         });
+
         binding.registerButton.setOnClickListener(v -> handleRegistration());
 
         // Pre-fill fields from arguments (optional)

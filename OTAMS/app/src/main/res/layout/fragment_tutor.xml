@@ -16,14 +16,14 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <RadioButton
-            android:id="@+id/radio_pending"
+            android:id="@+id/radio_past"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="@string/past_sessions" />
 
         <RadioButton
-            android:id="@+id/radio_rejected"
+            android:id="@+id/radio_future"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/future_sessions" />

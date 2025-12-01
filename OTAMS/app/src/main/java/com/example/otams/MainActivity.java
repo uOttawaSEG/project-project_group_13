@@ -3,6 +3,7 @@ package com.example.otams;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -38,7 +39,23 @@ public class MainActivity extends AppCompatActivity {
         // Connect toolbar with NavController and AppBarConfiguration
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
 
-        Log.d("MainActivity", "NavController setup complete");
+        //back button in android navigation
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+                NavController navController = null;
+                if (navHostFragment != null) {
+                    navController = navHostFragment.getNavController();
+                }
+
+                if (navController != null && !navController.popBackStack()) {
+                    finish(); // no more back stack, close activity
+                }
+            }
+        });
+
+        Log.d("MainActivity", "All setup Complete");
     }
 
     @Override
