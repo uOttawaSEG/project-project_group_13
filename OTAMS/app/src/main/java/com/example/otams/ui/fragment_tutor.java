@@ -489,7 +489,7 @@ public class fragment_tutor extends Fragment {
 
     // Adapter class
     public static class SessionAdapter extends RecyclerView.Adapter<SessionAdapter.SessionViewHolder> {
-        private static boolean buttonsEnabled = true;
+        private boolean buttonsEnabled = true;
         private final OnItemClickListener listener;
         private List<Session> sessions;
 
