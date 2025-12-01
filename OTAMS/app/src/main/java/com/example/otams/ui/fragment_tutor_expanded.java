@@ -94,11 +94,11 @@ public class fragment_tutor_expanded extends Fragment {
         title.setPadding(16, 16, 16, 8);
         container.addView(title);
 
-        firebaseManager.getFirestore().collection("student").whereIn(FieldPath.documentId(), studentIds).get().addOnSuccessListener(querySnapshot -> {
+        firebaseManager.getFirestore().collection("users").whereIn(FieldPath.documentId(), studentIds).get().addOnSuccessListener(querySnapshot -> {
             for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                 String studentId = doc.getId();
-                String firstName = doc.getString("first_Name");
-                String lastName = doc.getString("last_Name");
+                String firstName = doc.getString("first_name");
+                String lastName = doc.getString("last_name");
                 String email = doc.getString("email");
 
                 String displayName = formatDisplayName(firstName, lastName, email);

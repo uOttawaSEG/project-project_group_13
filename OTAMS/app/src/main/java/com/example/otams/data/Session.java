@@ -23,6 +23,7 @@ public class Session implements Parcelable {
             return new Session[size];
         }
     };
+    public boolean isCancelled;
     private String sessionId;
     private String courseCode;
     private String location;
@@ -43,6 +44,7 @@ public class Session implements Parcelable {
         this.acceptedStudents = new ArrayList<>();
         this.rejectedStudents = new ArrayList<>();
         this.cancelledStudents = new ArrayList<>();
+        this.isCancelled = false;
     }
 
     // Constructor
@@ -70,6 +72,7 @@ public class Session implements Parcelable {
         pendingStudents = in.createStringArrayList();
         acceptedStudents = in.createStringArrayList();
         rejectedStudents = in.createStringArrayList();
+        isCancelled = in.readByte() != 0;
     }
 
     @Override
@@ -84,6 +87,7 @@ public class Session implements Parcelable {
         dest.writeStringList(pendingStudents);
         dest.writeStringList(acceptedStudents);
         dest.writeStringList(rejectedStudents);
+        dest.writeByte((byte) (isCancelled ? 1 : 0));
     }
 
     @Override
@@ -103,6 +107,7 @@ public class Session implements Parcelable {
     public List<String> getPendingStudents() {
         return pendingStudents;
     }
+
 
     public void setPendingStudents(List<String> pendingStudents) {
         this.pendingStudents = pendingStudents;
@@ -264,6 +269,31 @@ public class Session implements Parcelable {
         long twentyFourHours = 24 * 60 * 60 * 1000;
 
         return sessionStart - now > twentyFourHours;
+    }
+
+    @Exclude
+    public boolean canTutorCancel(String tutorId) {
+        // Check if this tutor owns the session
+        if (!getTutor().equals(tutorId)) {
+            return false;
+        }
+
+        // Check if session has already started
+        Timestamp now = Timestamp.now();
+        if (getStartTime().compareTo(now) <= 0) {
+            return false;
+        }
+
+        // Tutors can cancel their sessions if no students are enrolled
+        return getAcceptedStudents().isEmpty();
+    }
+
+    public boolean isCancelled() {
+        return isCancelled;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        isCancelled = cancelled;
     }
 }
 

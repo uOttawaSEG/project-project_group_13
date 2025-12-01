@@ -60,5 +60,6 @@
     <string name="end_time_e_g_08_30">End Time (e.g. 08:30)</string>
     <string name="auto_approve_session_requests">Auto-approve session requests</string>
     <string name="criteria_accepted">APPROVED</string>
+    <string name="cancel_this_session">Cancel this Session</string>
 
 </resources>

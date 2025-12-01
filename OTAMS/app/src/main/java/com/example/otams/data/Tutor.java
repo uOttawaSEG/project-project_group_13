@@ -8,6 +8,9 @@ public class Tutor extends Client {
 
     private String highest_degree;
     private String Courses_Offered;
+    private int average_rating;
+    private int rating_count;
+
 
     public Tutor(String Email, String Password, String First_Name, String Last_Name, String Phone_Number, ArrayList<String> Future_Session, ArrayList<String> Past_Session, String highest_degree, String Courses_Offered) {
         super(Email, Password, First_Name, Last_Name, Phone_Number, Future_Session, Past_Session);
@@ -42,4 +45,18 @@ public class Tutor extends Client {
         this.Courses_Offered = Courses_Offered;
 
     }
+
+    public void setAverage_rating(int rating){
+        this.average_rating = rating;
+    }
+    public int getAverage_rating(){
+        return average_rating;
+    }
+    public int getRating_count(){
+        return this.rating_count;
+    }
+    public void setRating_count(int rating_count){
+        this.rating_count = rating_count;
+    }
+
 }

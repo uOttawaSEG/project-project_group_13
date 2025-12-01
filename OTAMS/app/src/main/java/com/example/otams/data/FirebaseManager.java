@@ -170,7 +170,7 @@ public class FirebaseManager {
         firestore.collection("users").document(uid).set(userProfile).addOnSuccessListener(onSuccess).addOnFailureListener(onFailure);
     }
 
-    // Remove or fix these methods as they have inconsistent field names
+
     public ArrayList<Session> getFutureSessions() {
         ArrayList<Session> futureSessions = new ArrayList<>();
         FirebaseUser currentUser = getCurrentUser();
@@ -243,6 +243,36 @@ public class FirebaseManager {
             Log.e("FirebaseManager", "Error rejecting student: " + e.getMessage(), e);
             callback.onError(e);
         });
+    }
+
+    public Task<String> getTutorNameTask(String tutorId) {
+        if (tutorId == null || tutorId.isEmpty()) {
+            return Tasks.forResult("");
+        }
+
+        return firestore.collection("users").document(tutorId).get().continueWith(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                Tutor tutor = document.toObject(Tutor.class);
+                if (tutor != null) {
+                    String firstName = tutor.getFirst_name();
+                    String lastName = tutor.getLast_name();
+                    return formatName(firstName, lastName);
+                }
+            }
+            return "";
+        });
+    }
+
+    private String formatName(String firstName, String lastName) {
+        if (firstName != null && lastName != null) {
+            return firstName + " " + lastName;
+        } else if (firstName != null) {
+            return firstName;
+        } else if (lastName != null) {
+            return lastName;
+        }
+        return "";
     }
 
     public void enrollStudentInSession(String sessionId, String studentId, StudentStatusCallback callback) {
@@ -352,18 +382,30 @@ public class FirebaseManager {
         return sessions;
     }
 
+
     public void searchSessionsByCourse(String courseCode, String studentId, SessionFetchCallback callback) {
         // Get current time to filter future sessions
         Timestamp now = Timestamp.now();
 
-        firestore.collection("sessions").whereEqualTo("courseCode", courseCode.toUpperCase()).whereGreaterThan("startTime", now).get().addOnSuccessListener(querySnapshot -> {
+
+        // If search query is empty, return empty results
+        if (courseCode.isEmpty()) {
+            callback.onSessionsFetched(new ArrayList<>());
+            return;
+        }
+
+
+        String endPrefix = courseCode + "\uf8ff";
+
+        // Query for sessions where courseCode starts with the search query
+        firestore.collection("sessions").whereGreaterThanOrEqualTo("courseCode", courseCode).whereLessThanOrEqualTo("courseCode", endPrefix).whereGreaterThan("startTime", now).get().addOnSuccessListener(querySnapshot -> {
             List<Session> availableSessions = new ArrayList<>();
             for (DocumentSnapshot doc : querySnapshot) {
                 Session session = doc.toObject(Session.class);
                 if (session != null) {
                     session.setSessionId(doc.getId());
 
-                    // Only include sessions where student is not enrolled and has capacity
+                    // Only include sessions where student is not enrolled
                     String studentStatus = session.getStudentStatus(studentId);
                     if ("none".equals(studentStatus)) {
                         availableSessions.add(session);
@@ -371,7 +413,7 @@ public class FirebaseManager {
                 }
             }
 
-            // Sort by start time
+            // Sort by start time (earliest first)
             availableSessions.sort((s1, s2) -> s1.getStartTime().compareTo(s2.getStartTime()));
             callback.onSessionsFetched(availableSessions);
         }).addOnFailureListener(callback::onError);
@@ -419,6 +461,7 @@ public class FirebaseManager {
             callback.onError(e);
         });
     }
+
 
     public void rateTutor(String tutorId, String studentId, int rating, StudentStatusCallback callback) {
         firestore.collection("users").document(tutorId).get().addOnSuccessListener(documentSnapshot -> {

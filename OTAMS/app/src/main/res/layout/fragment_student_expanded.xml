@@ -21,7 +21,7 @@
             android:id="@+id/course_search_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter course code (e.g., MATH101)"
+            android:hint="Enter course code"
             android:inputType="textCapCharacters" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -34,6 +34,15 @@
         android:text="Search Available Sessions"
         android:layout_marginBottom="16dp" />
 
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp" />
+
     <!-- Empty State -->
     <LinearLayout
         android:id="@+id/empty_state"
@@ -41,22 +50,26 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:padding="16dp">
 
         <TextView
+            android:id="@+id/empty_state_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No sessions found"
-            android:textSize="18sp"
+            android:text="Enter a course code to search"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            android:gravity="center" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Try searching for a different course code"
+            android:text="Courses are case sensitive. Enter course code exaclty as shown"
             android:textSize="14sp"
-            android:textColor="?android:attr/textColorSecondary" />
+            android:textColor="?android:attr/textColorSecondary"
+            android:gravity="center" />
 
     </LinearLayout>
 
