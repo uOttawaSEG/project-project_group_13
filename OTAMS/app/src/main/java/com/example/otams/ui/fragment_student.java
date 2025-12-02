@@ -1,5 +1,6 @@
 package com.example.otams.ui;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,9 +25,9 @@ import com.example.otams.data.Session;
 import com.example.otams.databinding.FragmentStudentBinding;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -120,13 +121,55 @@ public class fragment_student extends Fragment {
     }
 
     private void rateTutor(Session session) {
-        // Implement rating dialog
+
         showRatingDialog(session.getTutor());
     }
 
     private void showRatingDialog(String tutorId) {
-        // Create rating dialog with 1-5 stars
-        // After rating, call firebaseManager.rateTutor()
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_rating, null);
+        builder.setView(dialogView);
+
+        AlertDialog dialog = builder.create();
+
+        // Find views
+        TextView tutorNameView = dialogView.findViewById(R.id.tutor_name);
+        Button cancelButton = dialogView.findViewById(R.id.cancel_button);
+        Button submitButton = dialogView.findViewById(R.id.submit_button);
+
+        // Load tutor name
+        tutorNameView.setText("Tutor: Loading...");
+        firebaseManager.getTutorNameTask(tutorId).addOnSuccessListener(tutorName -> {
+            tutorNameView.setText("Tutor: " + tutorName);
+        }).addOnFailureListener(e -> {
+            tutorNameView.setText("Tutor: Error");
+        });
+
+        // Set button click listeners
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+        submitButton.setOnClickListener(v -> {
+            // This won't work without implementing rating selection
+            Toast.makeText(requireContext(), "Select a rating first", Toast.LENGTH_SHORT).show();
+        });
+
+        dialog.show();
+    }
+
+    private void submitRating(String tutorId, int rating) {
+        String studentId = firebaseManager.getCurrentUser().getUid();
+
+        firebaseManager.rateTutor(tutorId, studentId, rating, new FirebaseManager.StudentStatusCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(requireContext(), "Rating submitted!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(requireContext(), "Failed to submit rating", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void navigateToSearch() {
