@@ -37,7 +37,7 @@ public class fragment_admin extends Fragment {
     private TextView emptyView;
     private UserAdapter userAdapter;
     private List<UserInfo> usersList;
-    private boolean showingRejected = false;
+    private String showingType = "";
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -70,11 +70,14 @@ public class fragment_admin extends Fragment {
         roleGroup.setOnCheckedChangeListener((group, checkedId) -> {
             clearView();
             if (checkedId == R.id.radio_pending) {
-                showingRejected = false;
-                loadUsersByStatus("PENDING");
+                showingType = "PENDING";
+                loadUsersByStatus(showingType);
             } else if (checkedId == R.id.radio_rejected) {
-                showingRejected = true;
-                loadUsersByStatus("REJECTED");
+                showingType = "REJECTED";
+                loadUsersByStatus(showingType);
+            } else if (checkedId == R.id.radio_accepted) {
+                showingType = "APPROVED";
+                loadUsersByStatus(showingType);
             }
 
         });
@@ -132,7 +135,7 @@ public class fragment_admin extends Fragment {
             }
 
             if (usersList.isEmpty()) {
-                emptyView.setText(showingRejected ? "No rejected users found." : "No pending users found.");
+                emptyView.setText(Objects.equals(showingType, "REJECTED") ? "No rejected users found." : "No pending users found.");
                 emptyView.setVisibility(View.VISIBLE);
             } else {
                 userAdapter.notifyDataSetChanged();
@@ -144,7 +147,7 @@ public class fragment_admin extends Fragment {
         firebaseManager.getFirestore().collection("users").document(uid).update("status", newStatus).addOnSuccessListener(aVoid -> {
             String message = "APPROVED".equals(newStatus) ? "User approved and activated" : "User status updated to " + newStatus;
             Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-            loadUsersByStatus(showingRejected ? "REJECTED" : "PENDING");
+            loadUsersByStatus(showingType);
         }).addOnFailureListener(e -> {
             Toast.makeText(getContext(), "Error updating status: " + e.getMessage(), Toast.LENGTH_LONG).show();
         });
@@ -215,6 +218,9 @@ public class fragment_admin extends Fragment {
                     updateUserStatus(user.uid, "APPROVED");
                     clearView();
                 });
+
+            } else if ("APPROVED".equals(user.status)) {
+                holder.actionButtons.setVisibility(View.GONE);
             }
         }
 

@@ -2,8 +2,7 @@ package com.example.otams.ui;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
-import android.content.res.Resources;
+import android.content.DialogInterface;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
 import android.os.Bundle;
@@ -12,16 +11,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.NumberPicker;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,27 +36,28 @@ import com.example.otams.databinding.FragmentTutorBinding;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
-import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class fragment_tutor extends Fragment {
-    private ArrayList<Session> future_sessions = new ArrayList<>();
-    private ArrayList<Session> past_sessions = new ArrayList<>();
+    private final ArrayList<Session> future_sessions = new ArrayList<>();
+    private final ArrayList<Session> past_sessions = new ArrayList<>();
     private FirebaseManager firebaseManager;
     private FragmentTutorBinding binding;
     private SessionAdapter adapter;
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentTutorBinding.inflate(inflater, container, false);
         requireActivity().setTitle("Tutor");
 
         firebaseManager = FirebaseManager.getInstance();
+        Log.d("fragment_tutor", "onCreateView: FirebaseManager initialized");
 
         setupCreateAvailabilityButton();
         setupRecyclerView();
@@ -69,51 +73,89 @@ public class fragment_tutor extends Fragment {
         MenuUtils.setupLogoutMenu(this, firebaseManager);
     }
 
-    private void setupRadioGroupListener() {
-        binding.sessionLabel.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.radio_pending) {
-                // Show past sessions
-                adapter.updateData(past_sessions);
-                loadSessions();
-            } else if (checkedId == R.id.radio_rejected) {
-                // Show future sessions
-                adapter.updateData(future_sessions);
-                loadSessions();
-            }
-        });
-    }
-
     private void loadSessions() {
         past_sessions.clear();
         future_sessions.clear();
 
+        Log.d("fragment_tutor", "Starting to load sessions");
+        Log.d("fragment_tutor", "Current user: " + (firebaseManager.getCurrentUser() != null ? firebaseManager.getCurrentUser().getUid() : "null"));
+
+        // Use atomic integer to track completion of both async operations
+        final AtomicInteger completedTasks = new AtomicInteger(0);
+        final int totalTasks = 2;
+
         firebaseManager.fetchPastSessions(new FirebaseManager.SessionFetchCallback() {
             @Override
             public void onSessionsFetched(List<Session> sessions) {
+                past_sessions.clear();
                 past_sessions.addAll(sessions);
-                if (binding.sessionLabel.getCheckedRadioButtonId() == R.id.radio_pending) {
-                    adapter.updateData(past_sessions);
+                Log.d("fragment_tutor", "Past sessions loaded: " + past_sessions.size());
+
+                int completed = completedTasks.incrementAndGet();
+                if (completed == totalTasks) {
+                    updateAdapterAfterLoad();
                 }
             }
 
             @Override
             public void onError(Exception e) {
+                Log.e("fragment_tutor", "Failed to load past sessions", e);
                 Toast.makeText(requireContext(), "Failed to load past sessions", Toast.LENGTH_SHORT).show();
+
+                int completed = completedTasks.incrementAndGet();
+                if (completed == totalTasks) {
+                    updateAdapterAfterLoad();
+                }
             }
         });
 
         firebaseManager.fetchFutureSessions(new FirebaseManager.SessionFetchCallback() {
             @Override
             public void onSessionsFetched(List<Session> sessions) {
+                future_sessions.clear();
                 future_sessions.addAll(sessions);
-                if (binding.sessionLabel.getCheckedRadioButtonId() == R.id.radio_rejected) {
-                    adapter.updateData(future_sessions);
+                Log.d("fragment_tutor", "Future sessions loaded: " + future_sessions.size());
+
+                int completed = completedTasks.incrementAndGet();
+                if (completed == totalTasks) {
+                    updateAdapterAfterLoad();
                 }
             }
 
             @Override
             public void onError(Exception e) {
+                Log.e("fragment_tutor", "Failed to load future sessions", e);
                 Toast.makeText(requireContext(), "Failed to load future sessions", Toast.LENGTH_SHORT).show();
+
+                int completed = completedTasks.incrementAndGet();
+                if (completed == totalTasks) {
+                    updateAdapterAfterLoad();
+                }
+            }
+        });
+    }
+
+    private void updateAdapterAfterLoad() {
+        if (!isAdded()) return;
+
+        requireActivity().runOnUiThread(() -> {
+            int selectedId = binding.sessionLabel.getCheckedRadioButtonId();
+            if (selectedId == R.id.radio_past) {
+                adapter.updateData(past_sessions);
+                Log.d("fragment_tutor", "Updated adapter with past sessions: " + past_sessions.size());
+            } else if (selectedId == R.id.radio_future) {
+                adapter.updateData(future_sessions);
+                Log.d("fragment_tutor", "Updated adapter with future sessions: " + future_sessions.size());
+            }
+        });
+    }
+
+    private void setupRadioGroupListener() {
+        binding.sessionLabel.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.radio_past) {
+                adapter.updateData(past_sessions);
+            } else if (checkedId == R.id.radio_future) {
+                adapter.updateData(future_sessions);
             }
         });
     }
@@ -123,10 +165,10 @@ public class fragment_tutor extends Fragment {
     }
 
     private void setupRecyclerView() {
-        adapter = new SessionAdapter(past_sessions, new SessionAdapter.OnItemClickListener() {
+        adapter = new SessionAdapter(new ArrayList<>(), new SessionAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Session session) {
-                // Handle click
+                onSessionClicked(session);
             }
 
             @Override
@@ -143,59 +185,90 @@ public class fragment_tutor extends Fragment {
         binding.pastSessionsList.setLayoutManager(new LinearLayoutManager(requireContext()));
     }
 
+    private void showHalfHourPicker(EditText targetInput) {
+        // Hours 0–23
+        String[] hours = new String[24];
+        for (int i = 0; i < 24; i++) {
+            hours[i] = String.format("%02d", i);
+        }
+
+        // Minutes restricted to 00 and 30
+        String[] minutes = {"00", "30"};
+
+        // Build spinners
+        Spinner hourSpinner = new Spinner(requireContext());
+        Spinner minuteSpinner = new Spinner(requireContext());
+
+        ArrayAdapter<String> hourAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, hours);
+        ArrayAdapter<String> minuteAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, minutes);
+
+        hourSpinner.setAdapter(hourAdapter);
+        minuteSpinner.setAdapter(minuteAdapter);
+
+        // Layout to hold both spinners side by side
+        LinearLayout layout = new LinearLayout(requireContext());
+        layout.setOrientation(LinearLayout.HORIZONTAL);
+        layout.setPadding(50, 40, 50, 10);
+        layout.addView(hourSpinner);
+        layout.addView(minuteSpinner);
+
+        // Show dialog
+        new AlertDialog.Builder(requireContext()).setTitle("Select Time").setView(layout).setPositiveButton("OK", (dialog, which) -> {
+            String formattedTime = hourSpinner.getSelectedItem() + ":" + minuteSpinner.getSelectedItem();
+            targetInput.setText(formattedTime);
+        }).setNegativeButton("Cancel", null).show();
+    }
+
     private void onSessionClicked(Session session) {
-        // Toast.makeText(requireContext(), "Clicked session: " + session.getCourse(),
-        // Toast.LENGTH_SHORT).show();
-        // TODO: Open session details or do something with the clicked session
+        NavController navController = Navigation.findNavController(requireView());
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("session", session);
+        navController.navigate(R.id.action_fragment_tutor_to_fragment_tutor_expanded, bundle);
     }
 
     private void showStudentListDialog(Session session) {
-        List<String> studentIds = session.getStudents(); // your Session model should return List<String>
+        ArrayList<String> studentIds = session.getEnrolledStudents();
 
         if (studentIds == null || studentIds.isEmpty()) {
             Toast.makeText(requireContext(), "No students enrolled.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        firebaseManager.getFirestore().collection("users").whereIn(FieldPath.documentId(), studentIds).get()
-                .addOnSuccessListener(querySnapshot -> {
-                    List<String> studentNames = new ArrayList<>();
+        firebaseManager.getFirestore().collection("student").whereIn(FieldPath.documentId(), studentIds).get().addOnSuccessListener(querySnapshot -> {
+            ArrayList<String> studentNames = new ArrayList<>();
 
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        String firstName = doc.getString("first_Name");
-                        String lastName = doc.getString("last_Name");
-                        String email = doc.getString("username");
+            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                String firstName = doc.getString("first_Name");
+                String lastName = doc.getString("last_Name");
+                String email = doc.getString("email");
 
-                        // Combine nicely even if one part is missing
-                        String displayName;
-                        if (firstName != null && lastName != null) {
-                            displayName = firstName + " " + lastName;
-                        } else if (firstName != null) {
-                            displayName = firstName;
-                        } else {
-                            displayName = email != null ? email : "Unknown Student";
-                        }
+                // Combine nicely even if one part is missing
+                String displayName;
+                if (firstName != null && lastName != null) {
+                    displayName = firstName + " " + lastName;
+                } else displayName = Objects.requireNonNullElseGet(firstName, () -> email != null ? email : "Unknown Student");
 
-                        studentNames.add(displayName);
-                    }
+                studentNames.add(displayName);
+            }
 
-                    if (studentNames.isEmpty()) {
-                        Toast.makeText(requireContext(), "No valid student records found.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+            if (studentNames.isEmpty()) {
+                Toast.makeText(requireContext(), "No valid student records found.", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-                    // Display students in a dialog
-                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                    builder.setTitle("Student List");
-                    builder.setItems(studentNames.toArray(new String[0]), null);
-                    builder.setPositiveButton("OK", null);
-                    builder.show();
+            // Display students in a dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle("Student List");
+            builder.setItems(studentNames.toArray(new String[0]), null);
+            builder.setPositiveButton("OK", null);
+            builder.show();
 
-                }).addOnFailureListener(e -> {
-                    Log.e("fragment_tutor", "Failed to load students", e);
-                    Toast.makeText(requireContext(), "Failed to load student list.", Toast.LENGTH_SHORT).show();
-                });
+        }).addOnFailureListener(e -> {
+            Log.e("fragment_tutor", "Failed to load students", e);
+            Toast.makeText(requireContext(), "Failed to load student list.", Toast.LENGTH_SHORT).show();
+        });
     }
+
 
     private void showEditAvailabilityDialog(Session session) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -211,6 +284,8 @@ public class fragment_tutor extends Fragment {
         EditText subjectInput = dialogView.findViewById(R.id.subjectInput);
         EditText locationInput = dialogView.findViewById(R.id.locationInput);
         CheckBox autoApproveCheck = dialogView.findViewById(R.id.autoApproveCheck);
+        CheckBox cancelSessionCheck = dialogView.findViewById(R.id.cancelSessionCheck);
+
 
         dateInput.setInputType(InputType.TYPE_NULL);
         startTimeInput.setInputType(InputType.TYPE_NULL);
@@ -234,64 +309,26 @@ public class fragment_tutor extends Fragment {
             int month = today.get(Calendar.MONTH);
             int day = today.get(Calendar.DAY_OF_MONTH);
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
-                    (view, selectedYear, selectedMonth, selectedDay) -> {
-                        String formattedDate = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1,
-                                selectedDay);
-                        dateInput.setText(formattedDate);
-                    }, year, month, day);
+            DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), (view, selectedYear, selectedMonth, selectedDay) -> {
+                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay);
+                dateInput.setText(formattedDate);
+            }, year, month, day);
 
             datePickerDialog.getDatePicker().setMinDate(today.getTimeInMillis());
             datePickerDialog.show();
         });
 
-        // Time picker for startTimeInput
-        startTimeInput.setOnClickListener(v -> {
-            final Calendar now = Calendar.getInstance();
-            int hour = now.get(Calendar.HOUR_OF_DAY);
-            int minute = now.get(Calendar.MINUTE);
+        startTimeInput.setOnClickListener(v -> showHalfHourPicker(startTimeInput));
+        endTimeInput.setOnClickListener(v -> showHalfHourPicker(endTimeInput));
 
-            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
-                    (view, selectedHour, selectedMinute) -> {
-                        int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
-                        String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
-                        startTimeInput.setText(formattedTime);
-                    }, hour, minute, true);
+        // Simple synchronous check
+        String tutorId = firebaseManager.getCurrentUser().getUid();
+        if (session.canTutorCancel(tutorId)) {
+            cancelSessionCheck.setVisibility(View.VISIBLE);
+        } else {
+            cancelSessionCheck.setVisibility(View.GONE);
+        }
 
-            timePickerDialog.show();
-
-            NumberPicker minutePicker = timePickerDialog
-                    .findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
-            if (minutePicker != null) {
-                minutePicker.setMinValue(0);
-                minutePicker.setMaxValue(1);
-                minutePicker.setDisplayedValues(new String[] { "00", "30" });
-            }
-        });
-
-        // Time picker for endTimeInput
-        endTimeInput.setOnClickListener(v -> {
-            final Calendar now = Calendar.getInstance();
-            int hour = now.get(Calendar.HOUR_OF_DAY);
-            int minute = now.get(Calendar.MINUTE);
-
-            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
-                    (view, selectedHour, selectedMinute) -> {
-                        int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
-                        String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
-                        endTimeInput.setText(formattedTime);
-                    }, hour, minute, true);
-
-            timePickerDialog.show();
-
-            NumberPicker minutePicker = timePickerDialog
-                    .findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
-            if (minutePicker != null) {
-                minutePicker.setMinValue(0);
-                minutePicker.setMaxValue(1);
-                minutePicker.setDisplayedValues(new String[] { "00", "30" });
-            }
-        });
 
         builder.setPositiveButton("Update", (dialog, which) -> {
             String date = dateInput.getText().toString().trim();
@@ -326,22 +363,15 @@ public class fragment_tutor extends Fragment {
                 session.setStartTime(startTimestamp);
                 session.setEndTime(endTimestamp);
 
-                // Update Firestore document using session ID (you must have it)
-                firebaseManager.getFirestore().collection("sessions").document(session.getSessionId())
-                        .set(session).addOnSuccessListener(aVoid -> {
-                            Toast.makeText(requireContext(), "Availability slot updated successfully",
-                                    Toast.LENGTH_SHORT).show();
-                            // Refresh UI lists if needed:
-                            if (binding.sessionLabel.getCheckedRadioButtonId() == R.id.radio_rejected) {
-                                adapter.updateData(future_sessions);
-                            } else {
-                                adapter.updateData(past_sessions);
-                            }
-                        }).addOnFailureListener(e -> {
-                            e.printStackTrace();
-                            Toast.makeText(requireContext(), "Failed to update availability slot", Toast.LENGTH_SHORT)
-                                    .show();
-                        });
+                // Update Firestore document using session ID
+                firebaseManager.getFirestore().collection("sessions").document(session.getSessionId()).set(session).addOnSuccessListener(aVoid -> {
+                    Toast.makeText(requireContext(), "Availability slot updated successfully", Toast.LENGTH_SHORT).show();
+                    // Refresh the sessions list
+                    loadSessions();
+                }).addOnFailureListener(e -> {
+                    e.printStackTrace();
+                    Toast.makeText(requireContext(), "Failed to update availability slot", Toast.LENGTH_SHORT).show();
+                });
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -368,6 +398,10 @@ public class fragment_tutor extends Fragment {
         EditText locationInput = dialogView.findViewById(R.id.locationInput);
         CheckBox autoApproveCheck = dialogView.findViewById(R.id.autoApproveCheck);
 
+        // Disable/hide cancel checkbox
+        CheckBox cancelSessionCheck = dialogView.findViewById(R.id.cancelSessionCheck);
+        cancelSessionCheck.setVisibility(View.GONE);
+
         dateInput.setInputType(InputType.TYPE_NULL);
         startTimeInput.setInputType(InputType.TYPE_NULL);
         endTimeInput.setInputType(InputType.TYPE_NULL);
@@ -379,147 +413,208 @@ public class fragment_tutor extends Fragment {
             int month = today.get(Calendar.MONTH);
             int day = today.get(Calendar.DAY_OF_MONTH);
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
-                    (view, selectedYear, selectedMonth, selectedDay) -> {
-                        String formattedDate = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1,
-                                selectedDay);
-                        dateInput.setText(formattedDate);
-                    }, year, month, day);
+            DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), (view, selectedYear, selectedMonth, selectedDay) -> {
+                String formattedDate = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay);
+                dateInput.setText(formattedDate);
+            }, year, month, day);
 
             datePickerDialog.getDatePicker().setMinDate(today.getTimeInMillis());
             datePickerDialog.show();
         });
 
-        // Time picker for startTimeInput
-        startTimeInput.setOnClickListener(v -> {
-            final Calendar now = Calendar.getInstance();
-            int hour = now.get(Calendar.HOUR_OF_DAY);
-            int minute = now.get(Calendar.MINUTE);
+        startTimeInput.setOnClickListener(v -> showHalfHourPicker(startTimeInput));
+        endTimeInput.setOnClickListener(v -> showHalfHourPicker(endTimeInput));
 
-            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
-                    (view, selectedHour, selectedMinute) -> {
-                        int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
-                        String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
-                        startTimeInput.setText(formattedTime);
-                    }, hour, minute, true);
+        AlertDialog dialog = builder.create();
 
-            timePickerDialog.show();
-
-            NumberPicker minutePicker = timePickerDialog
-                    .findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
-            if (minutePicker != null) {
-                minutePicker.setMinValue(0);
-                minutePicker.setMaxValue(1);
-                minutePicker.setDisplayedValues(new String[] { "00", "30" });
-            }
-        });
-
-        // Time picker for endTimeInput
-        endTimeInput.setOnClickListener(v -> {
-            final Calendar now = Calendar.getInstance();
-            int hour = now.get(Calendar.HOUR_OF_DAY);
-            int minute = now.get(Calendar.MINUTE);
-
-            TimePickerDialog timePickerDialog = new TimePickerDialog(requireContext(),
-                    (view, selectedHour, selectedMinute) -> {
-                        int snappedMinute = (selectedMinute >= 30) ? 30 : 0;
-                        String formattedTime = String.format("%02d:%02d", selectedHour, snappedMinute);
-                        endTimeInput.setText(formattedTime);
-                    }, hour, minute, true);
-
-            timePickerDialog.show();
-
-            NumberPicker minutePicker = timePickerDialog
-                    .findViewById(Resources.getSystem().getIdentifier("minute", "id", "android"));
-            if (minutePicker != null) {
-                minutePicker.setMinValue(0);
-                minutePicker.setMaxValue(1);
-                minutePicker.setDisplayedValues(new String[] { "00", "30" });
-            }
-        });
-
-        builder.setPositiveButton("Create", (dialog, which) -> {
-            String date = dateInput.getText().toString().trim();
-            String start = startTimeInput.getText().toString().trim();
-            String end = endTimeInput.getText().toString().trim();
-            String course = subjectInput.getText().toString().trim();
-            String location = locationInput.getText().toString().trim();
-            boolean autoApprove = autoApproveCheck.isChecked();
-
-            if (date.isEmpty() || start.isEmpty() || end.isEmpty()) {
-                Toast.makeText(requireContext(), "All fields are required.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (end.compareTo(start) <= 0) {
-                Toast.makeText(requireContext(), "End time must be after start time.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-
-            try {
-                Date startDateTime = sdf.parse(date + " " + start);
-                Date endDateTime = sdf.parse(date + " " + end);
-
-                Timestamp startTimestamp = new Timestamp(startDateTime);
-                Timestamp endTimestamp = new Timestamp(endDateTime);
-
-                String uid = firebaseManager.getCurrentUser().getUid();
-
-                firebaseManager.getUserProfile().addOnSuccessListener(profileObj -> {
-                    if (profileObj instanceof Tutor) {
-                        Session newSession = new Session(course, autoApprove, location, startTimestamp, endTimestamp,
-                                uid);
-
-                        firebaseManager.getFirestore().collection("sessions").add(newSession)
-                                .addOnSuccessListener(documentReference -> {
-                                    newSession.setSessionId(documentReference.getId());
-
-                                    // Update the session document itself
-                                    documentReference.update("sessionID", documentReference.getId());
-
-                                    // Also update tutor document to include this new session
-                                    firebaseManager.getFirestore().collection("users").document(uid)
-                                            .update("future_Session", FieldValue.arrayUnion(documentReference.getId()))
-                                            .addOnSuccessListener(aVoid -> {
-                                                Toast.makeText(requireContext(),
-                                                        "Availability slot created successfully", Toast.LENGTH_SHORT)
-                                                        .show();
-                                            }).addOnFailureListener(e -> {
-                                                e.printStackTrace();
-                                                Toast.makeText(requireContext(), "Failed to update tutor record",
-                                                        Toast.LENGTH_SHORT).show();
-                                            });
-                                }).addOnFailureListener(e -> {
-                                    e.printStackTrace();
-                                    Toast.makeText(requireContext(), "Failed to create availability slot",
-                                            Toast.LENGTH_SHORT).show();
-                                });
-                    }
-                }).addOnFailureListener(e -> {
-                    Log.d("fragment_tutor", "showCreateAvailabilityDialog: " + e.getMessage());
-                    e.printStackTrace();
-                    Toast.makeText(requireContext(), "Error getting user profile", Toast.LENGTH_SHORT).show();
-                });
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(requireContext(), "Invalid date or time format", Toast.LENGTH_SHORT).show();
-            }
-        });
-
+        // Set up custom positive button handling to prevent auto-dismiss
+        builder.setPositiveButton("Create", null);
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+
+        dialog = builder.create();
+
+        AlertDialog finalDialog = dialog;
+        dialog.setOnShowListener(dialogInterface -> {
+            Button positiveButton = finalDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            Button negativeButton = finalDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+
+            positiveButton.setOnClickListener(view -> {
+                String date = dateInput.getText().toString().trim();
+                String start = startTimeInput.getText().toString().trim();
+                String end = endTimeInput.getText().toString().trim();
+                String course = subjectInput.getText().toString().trim();
+                String location = locationInput.getText().toString().trim();
+                boolean autoApprove = autoApproveCheck.isChecked();
+
+                // Basic validation
+                if (date.isEmpty() || start.isEmpty() || end.isEmpty() ||
+                        course.isEmpty() || location.isEmpty()) {
+                    Toast.makeText(requireContext(), "All fields are required.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (end.compareTo(start) <= 0) {
+                    Toast.makeText(requireContext(), "End time must be after start time.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                try {
+                    // Parse dates
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+                    Date startDateTime = sdf.parse(date + " " + start);
+                    Date endDateTime = sdf.parse(date + " " + end);
+
+                    // Validate duration (minimum 30 minutes, maximum 4 hours)
+                    long duration = endDateTime.getTime() - startDateTime.getTime();
+                    long minDuration = 30 * 60 * 1000; // 30 minutes
+                    long maxDuration = 4 * 60 * 60 * 1000; // 4 hours
+
+                    if (duration < minDuration) {
+                        Toast.makeText(requireContext(), "Minimum slot duration is 30 minutes", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (duration > maxDuration) {
+                        Toast.makeText(requireContext(), "Maximum slot duration is 4 hours", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Convert to timestamps
+                    Timestamp startTimestamp = new Timestamp(startDateTime);
+                    Timestamp endTimestamp = new Timestamp(endDateTime);
+
+                    // Disable buttons while checking
+                    positiveButton.setEnabled(false);
+                    negativeButton.setEnabled(false);
+                    positiveButton.setText("Checking conflicts...");
+
+                    // Check for conflicts first
+                    checkForConflictsAndCreateSlot(
+                            startTimestamp,
+                            endTimestamp,
+                            course,
+                            autoApprove,
+                            location,
+                            finalDialog,
+                            positiveButton,
+                            negativeButton
+                    );
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(requireContext(), "Invalid date or time format", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
+        dialog.show();
     }
+
+    private void checkForConflictsAndCreateSlot(Timestamp start, Timestamp end, String course,
+                                                boolean autoApprove, String location,
+                                                AlertDialog dialog, Button positiveButton,
+                                                Button negativeButton) {
+
+        String uid = firebaseManager.getCurrentUser().getUid();
+
+        // Check for conflicts
+        firebaseManager.checkSessionConflict(uid, start, end, new FirebaseManager.SimpleConflictCallback() {
+            @Override
+            public void onResult(@Nullable Exception conflict) {
+                if (conflict != null) {
+                    // Conflict found - show error and re-enable buttons
+                    Toast.makeText(requireContext(), conflict.getMessage(), Toast.LENGTH_SHORT).show();
+                    positiveButton.setEnabled(true);
+                    negativeButton.setEnabled(true);
+                    positiveButton.setText("Create");
+                    return;
+                }
+
+                // No conflicts - get user profile and create session
+                firebaseManager.getUserProfile().addOnSuccessListener(profileObj -> {
+                            if (profileObj instanceof Tutor) {
+                                // Create the session object
+                                Session newSession = new Session(course, autoApprove, location, start, end, uid);
+
+                                // Add to Firestore
+                                firebaseManager.getFirestore().collection("sessions")
+                                        .add(newSession)
+                                        .addOnSuccessListener(documentReference -> {
+                                            // Set the session ID
+                                            newSession.setSessionId(documentReference.getId());
+
+                                            // Update the document with the session ID
+                                            documentReference.update("sessionId", documentReference.getId())
+                                                    .addOnSuccessListener(aVoid -> {
+                                                        // Success - dismiss dialog and refresh
+                                                        dialog.dismiss();
+                                                        Toast.makeText(requireContext(),
+                                                                "Availability slot created successfully",
+                                                                Toast.LENGTH_SHORT).show();
+                                                        loadSessions();
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        // Failed to update session ID
+                                                        e.printStackTrace();
+                                                        positiveButton.setEnabled(true);
+                                                        negativeButton.setEnabled(true);
+                                                        positiveButton.setText("Create");
+                                                        Toast.makeText(requireContext(),
+                                                                "Failed to update session ID",
+                                                                Toast.LENGTH_SHORT).show();
+                                                    });
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            // Failed to add session
+                                            e.printStackTrace();
+                                            positiveButton.setEnabled(true);
+                                            negativeButton.setEnabled(true);
+                                            positiveButton.setText("Create");
+                                            Toast.makeText(requireContext(),
+                                                    "Failed to create availability slot",
+                                                    Toast.LENGTH_SHORT).show();
+                                        });
+                            } else {
+                                // User is not a tutor
+                                positiveButton.setEnabled(true);
+                                negativeButton.setEnabled(true);
+                                positiveButton.setText("Create");
+                                Toast.makeText(requireContext(),
+                                        "Only tutors can create availability slots",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            // Failed to get user profile
+                            Log.d("fragment_tutor", "Failed to get user profile: " + e.getMessage());
+                            e.printStackTrace();
+                            positiveButton.setEnabled(true);
+                            negativeButton.setEnabled(true);
+                            positiveButton.setText("Create");
+                            Toast.makeText(requireContext(),
+                                    "Error getting user profile",
+                                    Toast.LENGTH_SHORT).show();
+                        });
+            }
+        });
+    }
+
+
 
     // Adapter class
     public static class SessionAdapter extends RecyclerView.Adapter<SessionAdapter.SessionViewHolder> {
+        private static boolean buttonsEnabled = true;
         private final OnItemClickListener listener;
         private List<Session> sessions;
 
         public SessionAdapter(List<Session> sessions, OnItemClickListener listener) {
             this.sessions = sessions;
             this.listener = listener;
+        }
+
+        public void setButtonsEnabled(boolean enabled) {
+            buttonsEnabled = enabled;
+            notifyDataSetChanged();
         }
 
         @NonNull
@@ -571,26 +666,63 @@ public class fragment_tutor extends Fragment {
                 tvDate.setText(dateStr);
 
                 SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                String timeRange = timeFormat.format(session.getStartTime().toDate()) + " - "
-                        + timeFormat.format(session.getEndTime().toDate());
+                String timeRange = timeFormat.format(session.getStartTime().toDate()) + " - " + timeFormat.format(session.getEndTime().toDate());
                 tvTime.setText(timeRange);
 
                 tvLocation.setText(session.getLocation());
 
-                itemView.setOnClickListener(v -> {
-                    if (listener != null)
-                        listener.onItemClick(session);
-                });
+                if (session.isCancelled()) {
+                    // Hide action buttons for cancelled sessions
+                    btnStudentList.setVisibility(View.GONE);
+                    btnEdit.setVisibility(View.GONE);
 
-                btnStudentList.setOnClickListener(v -> {
-                    if (listener != null)
-                        listener.onStudentListClick(session);
-                });
+                    // Gray out the item
+                    itemView.setAlpha(0.6f);
 
-                btnEdit.setOnClickListener(v -> {
-                    if (listener != null)
-                        listener.onEditClick(session);
-                });
+                    // Set click listener only for viewing details
+                    itemView.setOnClickListener(v -> {
+                        if (listener != null) listener.onItemClick(session);
+                    });
+
+                    return; // Skip the rest for cancelled sessions
+                }
+
+                // For active sessions
+                btnStudentList.setVisibility(View.VISIBLE);
+                btnEdit.setVisibility(View.VISIBLE);
+
+                // Set normal alpha
+                itemView.setAlpha(1.0f);
+
+                // Check loading state for buttons
+                btnStudentList.setEnabled(buttonsEnabled);
+                btnEdit.setEnabled(buttonsEnabled);
+                itemView.setEnabled(buttonsEnabled);
+
+                // Set alpha to indicate enabled/disabled state
+                float alpha = buttonsEnabled ? 1.0f : 0.5f;
+                btnStudentList.setAlpha(alpha);
+                btnEdit.setAlpha(alpha);
+
+                // Set click listeners only if buttons are enabled
+                if (buttonsEnabled) {
+                    itemView.setOnClickListener(v -> {
+                        if (listener != null) listener.onItemClick(session);
+                    });
+
+                    btnStudentList.setOnClickListener(v -> {
+                        if (listener != null) listener.onStudentListClick(session);
+                    });
+
+                    btnEdit.setOnClickListener(v -> {
+                        if (listener != null) listener.onEditClick(session);
+                    });
+                } else {
+                    // Remove click listeners when disabled
+                    itemView.setOnClickListener(null);
+                    btnStudentList.setOnClickListener(null);
+                    btnEdit.setOnClickListener(null);
+                }
             }
         }
     }

@@ -119,24 +119,29 @@ public class fragment_login extends Fragment {
                 }
 
                 loadingProgressBar.setVisibility(View.VISIBLE);
+                loginButton.setEnabled(false);
 
                 firebaseManager.signIn(email, password, task -> {
                     loadingProgressBar.setVisibility(View.GONE);
+                    loginButton.setEnabled(true);
 
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseManager.getCurrentUser();
-                        Toast.makeText(getContext(), "Welcome " + user.getEmail(), Toast.LENGTH_SHORT).show();
-                        // Navigate to next screen here
-                        NavController navController = Navigation.findNavController(requireView());
-                        navController.navigate(R.id.action_loginFragment_to_fragment_homepage);
+                        if (user != null) {
+                            Toast.makeText(getContext(), "Welcome " + user.getEmail(), Toast.LENGTH_SHORT).show();
+                            // Navigate to next screen here
+                            NavController navController = Navigation.findNavController(requireView());
+                            navController.navigate(R.id.action_loginFragment_to_fragment_homepage);
+                        } else {
+                            Toast.makeText(getContext(), "Login failed: user is null", Toast.LENGTH_SHORT).show();
+                        }
                     } else {
-                        Toast.makeText(getContext(), "Login failed: " +
-                                Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Login failed", Toast.LENGTH_SHORT).show();
                     }
+
                 });
             });
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.e("MainActivity", "Error in onCreate", e);
         }
     }

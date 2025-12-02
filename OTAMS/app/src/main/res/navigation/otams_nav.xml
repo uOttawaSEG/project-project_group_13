@@ -64,10 +64,13 @@
         android:id="@+id/fragment_tutor"
         android:name="com.example.otams.ui.fragment_tutor"
         android:label="fragment_tutor_list"
-        tools:layout="@layout/fragment_tutor_student0list" >
+        tools:layout="@layout/item_tutor_student0list" >
         <action
             android:id="@+id/action_fragment_tutor_to_loginFragment"
             app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_fragment_tutor_to_fragment_tutor_expanded"
+            app:destination="@id/fragment_tutor_expanded" />
     </fragment>
     <fragment
         android:id="@+id/fragment_student"
@@ -77,5 +80,26 @@
         <action
             android:id="@+id/action_fragment_student_to_loginFragment"
             app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_fragment_student_to_fragment_student_expanded"
+            app:destination="@id/fragment_student_expanded" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragment_tutor_expanded"
+        android:name="com.example.otams.ui.fragment_tutor_expanded"
+        android:label="fragment_tutor_expanded"
+        tools:layout="@layout/fragment_tutor_expanded" >
+        <action
+            android:id="@+id/action_fragment_tutor_expanded_to_fragment_tutor"
+            app:destination="@id/fragment_tutor" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragment_student_expanded"
+        android:name="com.example.otams.ui.fragment_student_expanded"
+        android:label="fragment_student_expanded"
+        tools:layout="@layout/fragment_student_expanded" >
+        <action
+            android:id="@+id/action_fragment_student_expanded_to_fragment_student"
+            app:destination="@id/fragment_student" />
     </fragment>
 </navigation>

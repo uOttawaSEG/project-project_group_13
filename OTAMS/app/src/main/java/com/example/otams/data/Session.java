@@ -1,53 +1,219 @@
 package com.example.otams.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.google.firebase.Timestamp;
+import com.google.firebase.database.Exclude;
+
+import java.util.ArrayList;
 import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class Session {
+public class Session implements Parcelable {
+    public static final Creator<Session> CREATOR = new Creator<Session>() {
+        @Override
+        public Session createFromParcel(Parcel in) {
+            return new Session(in);
+        }
 
-    private boolean auto_approve;
+        @Override
+        public Session[] newArray(int size) {
+            return new Session[size];
+        }
+    };
+    private boolean isCancelled;
+    private String sessionId;
+    private String courseCode;
     private String location;
-    private String course_code;
-    private Timestamp start_time;
-    private Timestamp end_time;
-    private String tutor_id;
-    private ArrayList<String> students;
-    private String sessionID;
+    private Timestamp startTime;
+    private Timestamp endTime;
+    private String tutor;
+    private boolean autoApprove;
+    // Separate lists for different statuses
+    private List<String> pendingStudents;  // Students who requested enrollment
+    private List<String> acceptedStudents; // Students who are accepted
+    private List<String> rejectedStudents; // Students who are rejected
+    private List<String> cancelledStudents;// Students who are cancelled
 
-    public Session(String course_code, boolean auto_approve, String location, Timestamp start_time, Timestamp end_time, String tutorID) {
-        this.start_time = start_time;
-        this.end_time = end_time;
-        this.tutor_id = tutorID;
-        this.course_code = course_code;
-        this.auto_approve = auto_approve;
-        this.location = location;
-        this.students = new ArrayList<>();
-    }
 
+    // Empty constructor
     public Session() {
-
+        this.pendingStudents = new ArrayList<>();
+        this.acceptedStudents = new ArrayList<>();
+        this.rejectedStudents = new ArrayList<>();
+        this.cancelledStudents = new ArrayList<>();
+        this.isCancelled = false;
     }
 
-    public Session(String tutorID) {
-        this.tutor_id = tutorID;
+    // Constructor
+    public Session(String courseCode, boolean autoApprove, String location, Timestamp startTime, Timestamp endTime, String tutor) {
+        this.courseCode = courseCode;
+        this.autoApprove = autoApprove;
+        this.location = location;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.tutor = tutor;
+        this.pendingStudents = new ArrayList<>();
+        this.acceptedStudents = new ArrayList<>();
+        this.rejectedStudents = new ArrayList<>();
+        this.cancelledStudents = new ArrayList<>();
+    }
+
+    protected Session(Parcel in) {
+        sessionId = in.readString();
+        courseCode = in.readString();
+        location = in.readString();
+        startTime = in.readParcelable(Timestamp.class.getClassLoader());
+        endTime = in.readParcelable(Timestamp.class.getClassLoader());
+        tutor = in.readString();
+        autoApprove = in.readByte() != 0;
+        pendingStudents = in.createStringArrayList();
+        acceptedStudents = in.createStringArrayList();
+        rejectedStudents = in.createStringArrayList();
+        isCancelled = in.readByte() != 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(sessionId);
+        dest.writeString(courseCode);
+        dest.writeString(location);
+        dest.writeParcelable(startTime, flags);
+        dest.writeParcelable(endTime, flags);
+        dest.writeString(tutor);
+        dest.writeByte((byte) (autoApprove ? 1 : 0));
+        dest.writeStringList(pendingStudents);
+        dest.writeStringList(acceptedStudents);
+        dest.writeStringList(rejectedStudents);
+        dest.writeByte((byte) (isCancelled ? 1 : 0));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public List<String> getCancelledStudents() {
+        return cancelledStudents;
+    }
+
+    public void setCancelledStudents(List<String> cancelledStudents) {
+        this.cancelledStudents = cancelledStudents;
+    }
+
+    // Getters and setters
+    public List<String> getPendingStudents() {
+        return pendingStudents;
+    }
+
+
+    public void setPendingStudents(List<String> pendingStudents) {
+        this.pendingStudents = pendingStudents;
+    }
+
+    public List<String> getAcceptedStudents() {
+        return acceptedStudents;
+    }
+
+    public void setAcceptedStudents(List<String> acceptedStudents) {
+        this.acceptedStudents = acceptedStudents;
+    }
+
+    public List<String> getRejectedStudents() {
+        return rejectedStudents;
+    }
+
+    public void setRejectedStudents(List<String> rejectedStudents) {
+        this.rejectedStudents = rejectedStudents;
+    }
+
+    // Helper methods
+    public void addPendingStudent(String studentId) {
+        if (!pendingStudents.contains(studentId)) {
+            pendingStudents.add(studentId);
+        }
+    }
+
+    public void acceptStudent(String studentId) {
+        if (pendingStudents.contains(studentId)) {
+            pendingStudents.remove(studentId);
+        }
+        if (rejectedStudents.contains(studentId)) {
+            rejectedStudents.remove(studentId);
+        }
+        if (!acceptedStudents.contains(studentId)) {
+            acceptedStudents.add(studentId);
+        }
+    }
+
+    public void rejectStudent(String studentId) {
+        if (pendingStudents.contains(studentId)) {
+            pendingStudents.remove(studentId);
+        }
+        if (acceptedStudents.contains(studentId)) {
+            acceptedStudents.remove(studentId);
+        }
+        if (!rejectedStudents.contains(studentId)) {
+            rejectedStudents.add(studentId);
+        }
+    }
+
+    // Get all enrolled students (accepted only)
+    public ArrayList<String> getEnrolledStudents() {
+        return new ArrayList<>(acceptedStudents);
+    }
+
+    // Check if student is enrolled
+
+
+    // Check if student is pending
+
+
+    // Auto-approve logic
+    public void processAutoApprove(String studentId) {
+        if (autoApprove) {
+            acceptStudent(studentId);
+        } else {
+            addPendingStudent(studentId);
+        }
     }
 
     public String getSessionId() {
-        return sessionID;
+        return sessionId;
+
     }
 
-    public String setSessionId(String session_id) {
-        return this.sessionID = session_id;
+    public void setSessionId(String id) {
+        this.sessionId = id;
     }
 
-    public boolean isAutoApprove() {
-        return auto_approve;
+    public Timestamp getStartTime() {
+        return startTime;
     }
 
-    public void setAutoApprove(boolean auto_approve) {
-        this.auto_approve = auto_approve;
+    public void setStartTime(Timestamp startTime) {
+        this.startTime = startTime;
     }
+
+    public Timestamp getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Timestamp endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getCourseCode() {
+        return courseCode;
+    }
+
+    public void setCourseCode(String courseCode) {
+        this.courseCode = courseCode;
+    }
+
 
     public String getLocation() {
         return location;
@@ -57,57 +223,78 @@ public class Session {
         this.location = location;
     }
 
-    public String getCourseCode() {
-        return course_code;
-    }
-
-    public void setCourseCode(String course_code) {
-        this.course_code = course_code;
-    }
-
-    public Timestamp getStartTime() {
-        return start_time;
-    }
-
-    public void setStartTime(Timestamp startTime) {
-        this.start_time = startTime;
-    }
-
-    public Timestamp getEndTime() {
-        return end_time;
-    }
-
-    public void setEndTime(Timestamp endTime) {
-        this.end_time = endTime;
-    }
-
     public String getTutor() {
-        return tutor_id;
+        return tutor;
     }
 
     public void setTutor(String tutor) {
-        this.tutor_id = tutor;
+        this.tutor = tutor;
     }
 
-    public ArrayList<String> getStudents() {
-        return students;
+    public boolean isAutoApprove() {
+        return autoApprove;
     }
 
-    public void setStudents(ArrayList<String> students) {
-        this.students = students;
+    public void setAutoApprove(boolean autoApprove) {
+        this.autoApprove = autoApprove;
     }
 
-    public void addStudent(String student) {
-        if (this.students == null) {
-            this.students = new ArrayList<>();
+    @Exclude
+    public String getStudentStatus(String studentId) {
+        if (acceptedStudents.contains(studentId)) return "accepted";
+        if (pendingStudents.contains(studentId)) return "pending";
+        if (rejectedStudents.contains(studentId)) return "rejected";
+        if (cancelledStudents.contains(studentId)) return "cancelled";
+        return "none";
+    }
+
+    @Exclude
+    public boolean isStudentEnrolled(String studentId) {
+        return acceptedStudents.contains(studentId);
+    }
+
+    @Exclude
+    public boolean isStudentPending(String studentId) {
+        return pendingStudents.contains(studentId);
+    }
+
+    @Exclude
+    public boolean canStudentCancel(String studentId) {
+        if (!acceptedStudents.contains(studentId) && !pendingStudents.contains(studentId)) {
+            return false;
         }
-        this.students.add(student);
+
+        // Check if session starts within 24 hours
+        long now = System.currentTimeMillis();
+        long sessionStart = startTime.toDate().getTime();
+        long twentyFourHours = 24 * 60 * 60 * 1000;
+
+        return sessionStart - now > twentyFourHours;
     }
 
-    public void removeStudent(String student) {
-        if (this.students != null) {
-            this.students.remove(student);
+    @Exclude
+    public boolean canTutorCancel(String tutorId) {
+        // Check if this tutor owns the session
+        if (!getTutor().equals(tutorId)) {
+            return false;
         }
+
+        // Check if session has already started
+        Timestamp now = Timestamp.now();
+        if (getStartTime().compareTo(now) <= 0) {
+            return false;
+        }
+
+        // Tutors can cancel their sessions if no students are enrolled
+        return getAcceptedStudents().isEmpty();
     }
 
+    public boolean isCancelled() {
+        return isCancelled;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        isCancelled = cancelled;
+    }
 }
+
