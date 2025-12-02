@@ -1,0 +1,249 @@
+@startuml OTAMS_UML_Diagram
+
+skinparam classAttributeIconSize 0
+
+class MainActivity {
+    - toolbar: MaterialToolbar
+    - navController: NavController
+    + onCreate(Bundle): void
+    + onSupportNavigateUp(): boolean
+}
+
+class fragment_signup {
+    - firebaseManager: FirebaseManager
+    - binding: FragmentSignupBinding
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+    + onViewCreated(View, Bundle): void
+    + validateForm(): void
+    + handleRegistration(): void
+}
+
+class fragment_tutor {
+    - future_sessions: ArrayList<Session>
+    - past_sessions: ArrayList<Session>
+    - firebaseManager: FirebaseManager
+    - binding: FragmentTutorBinding
+    - adapter: SessionAdapter
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+    + onViewCreated(View, Bundle): void
+    + loadSessions(): void
+    + showEditAvailabilityDialog(Session): void
+    + showCreateAvailabilityDialog(): void
+    + showStudentListDialog(Session): void
+}
+
+class fragment_student {
+    - firebaseManager: FirebaseManager
+    - binding: FragmentStudentBinding
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+}
+
+class fragment_login {
+    - firebaseManager: FirebaseManager
+    - binding: FragmentLoginBinding
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+    + onViewCreated(View, Bundle): void
+    + onResume(): void
+    + validateForm(): void
+}
+
+class fragment_homepage {
+    - firebaseManager: FirebaseManager
+    - binding: FragmentHomepageBinding
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+    + onViewCreated(View, Bundle): void
+    + onResume(): void
+}
+
+class fragment_admin {
+    - firebaseManager: FirebaseManager
+    - binding: FragmentAdminBinding
+    - usersRecyclerView: RecyclerView
+    - loadingProgressBar: ProgressBar
+    - emptyView: TextView
+    - userAdapter: UserAdapter
+    - usersList: List<UserInfo>
+    - showingRejected: boolean
+    + onCreateView(LayoutInflater, ViewGroup, Bundle): View
+    + onViewCreated(View, Bundle): void
+    + loadUsersByStatus(String): void
+    + updateUserStatus(String, String): void
+    + clearView(): void
+}
+
+class FirebaseManager {
+    - {static} instance: FirebaseManager
+    - auth: FirebaseAuth
+    - firestore: FirebaseFirestore
+    + {static} getInstance(): FirebaseManager
+    + getAuth(): FirebaseAuth
+    + getFirestore(): FirebaseFirestore
+    + getCurrentUser(): FirebaseUser
+    + signOut(): void
+    + fetchPastSessions(SessionFetchCallback): void
+    + fetchFutureSessions(SessionFetchCallback): void
+    + getUserProfile(): Task<Object>
+}
+
+class Session {
+    - auto_approve: boolean
+    - location: String
+    - course_code: String
+    - start_time: Timestamp
+    - end_time: Timestamp
+    - tutor_id: String
+    - students: ArrayList<String>
+    - sessionID: String
+    + Session()
+    + Session(String, boolean, String, Timestamp, Timestamp, String)
+    + Session(String)
+    + getSessionId(): String
+    + setSessionId(String): String
+    + isAutoApprove(): boolean
+    + setAutoApprove(boolean): void
+    + getLocation(): String
+    + setLocation(String): void
+    + getCourseCode(): String
+    + setCourseCode(String): void
+    + getStartTime(): Timestamp
+    + setStartTime(Timestamp): void
+    + getEndTime(): Timestamp
+    + setEndTime(Timestamp): void
+    + getTutorId(): String
+    + setTutorId(String): void
+    + getStudents(): ArrayList<String>
+    + setStudents(ArrayList<String>): void
+}
+
+class User {
+    - username: String
+    - password: String
+    - role: UserRole
+    - status: UserStatus
+    + User()
+    + User(String, String)
+    + getUsername(): String
+    + getPassword(): String
+    + getRole(): UserRole
+    + setRole(UserRole): void
+    + getStatus(): UserStatus
+    + setStatus(UserStatus): void
+}
+
+class Client {
+    - first_name: String
+    - last_name: String
+    - phone_number: String
+    - future_session: ArrayList<String>
+    - past_session: ArrayList<String>
+    + Client()
+    + Client(String, String, String, String, String, ArrayList<String>, ArrayList<String>)
+    + Client(String, String, String, String, String)
+    + getFirst_name(): String
+    + setFirst_name(String): void
+    + getLast_name(): String
+    + setLast_name(String): void
+    + getPhone_number(): String
+    + setPhone_number(String): void
+    + getFuture_session(): ArrayList<String>
+    + setFuture_session(ArrayList<String>): void
+    + getPast_session(): ArrayList<String>
+    + setPast_session(ArrayList<String>): void
+}
+
+class Student {
+    - program_of_study: String
+    + Student()
+    + Student(String, String, String, String, String, ArrayList<String>, ArrayList<String>, String)
+    + Student(String, String, String, String, String, String)
+    + getProgram_of_study(): String
+    + setProgram_of_study(String): void
+}
+
+class Tutor {
+    - highest_degree: String
+    - Courses_Offered: String
+    + Tutor()
+    + Tutor(String, String, String, String, String, ArrayList<String>, ArrayList<String>, String, String)
+    + Tutor(String, String, String, String, String, String, String)
+    + getHighest_degree(): String
+    + setHighest_degree(String): void
+    + getCourses_Offered(): String
+    + setCourses_Offered(String): void
+}
+
+class Admin {
+    + Admin(String, String)
+    + accept(): void
+    + reject(): void
+}
+
+class SessionAdapter {
+    - sessions: List<Session>
+    - listener: OnItemClickListener
+    + updateData(List<Session>): void
+    + onBindViewHolder(SessionViewHolder, int): void
+}
+
+class MenuUtils {
+    + {static} setupLogoutMenu(Fragment, FirebaseManager): void
+}
+
+enum UserRole {
+    ADMIN
+    TUTOR
+    STUDENT
+}
+
+enum UserStatus {
+    APPROVED
+    PENDING
+    REJECTED
+}
+
+interface "SessionFetchCallback" as SessionFetchCallback {
+    + onSuccess(List<Session>): void
+    + onFailure(Exception): void
+}
+
+' Inheritance relationships
+User <|-- Client
+Client <|-- Student
+Client <|-- Tutor
+User <|-- Admin
+
+' Navigation relationships
+MainActivity --> fragment_login : navigates to
+fragment_login --> fragment_signup : navigates to
+fragment_login --> fragment_homepage : navigates to
+fragment_homepage --> fragment_student : navigates to
+fragment_homepage --> fragment_tutor : navigates to
+fragment_homepage --> fragment_admin : navigates to
+
+' Usage/Dependency relationships
+fragment_login --> FirebaseManager : uses
+fragment_signup --> FirebaseManager : uses
+fragment_homepage --> FirebaseManager : uses
+fragment_student --> FirebaseManager : uses
+fragment_tutor --> FirebaseManager : uses
+fragment_admin --> FirebaseManager : uses
+
+fragment_tutor --> SessionAdapter : uses
+fragment_tutor --> Session : manages
+SessionAdapter --> Session : displays
+
+FirebaseManager --> SessionFetchCallback : uses
+FirebaseManager --> Session : manages
+FirebaseManager --> User : manages
+
+fragment_login --> MenuUtils : uses
+fragment_signup --> MenuUtils : uses
+fragment_homepage --> MenuUtils : uses
+fragment_student --> MenuUtils : uses
+fragment_tutor --> MenuUtils : uses
+fragment_admin --> MenuUtils : uses
+
+User --> UserRole : has
+User --> UserStatus : has
+
+@enduml

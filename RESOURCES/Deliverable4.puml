@@ -1,0 +1,235 @@
+@startuml OTAMS_Class_Diagram
+
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classFontSize 10
+skinparam packageStyle rectangle
+
+package "UI Layer" {
+
+  abstract class BaseFragment {
+    - firebaseManager: FirebaseManager
+    + onCreateView(): View
+    + onViewCreated(): void
+  }
+
+  class FragmentStudent {
+    - binding: FragmentStudentBinding
+    - adapter: StudentSessionAdapter
+    - studentSessions: List<Session>
+    + onCreateView(): View
+    + onViewCreated(): void
+    - setupRecyclerView(): void
+    - loadStudentSessions(): void
+    - cancelSession(Session): void
+    - rateTutor(Session): void
+    - showRatingDialog(String): void
+    - submitRating(String, int): void
+  }
+
+  class FragmentTutor {
+    - binding: FragmentTutorBinding
+    - adapter: SessionAdapter
+    - future_sessions: ArrayList<Session>
+    - past_sessions: ArrayList<Session>
+    + onCreateView(): View
+    + onViewCreated(): void
+    - loadSessions(): void
+    - setupCreateAvailabilityButton(): void
+    - showCreateAvailabilityDialog(): void
+    - checkForConflictsAndCreateSlot(...): void
+  }
+
+  class StudentSessionAdapter {
+    - sessions: List<Session>
+    - listener: SessionClickListener
+    + onCreateViewHolder(): SessionViewHolder
+    + onBindViewHolder(): void
+    + getItemCount(): int
+    + updateData(List<Session>): void
+  }
+
+  class SessionAdapter {
+    - sessions: List<Session>
+    - listener: OnItemClickListener
+    + onCreateViewHolder(): SessionViewHolder
+    + onBindViewHolder(): void
+    + getItemCount(): int
+    + updateData(List<Session>): void
+  }
+
+  class MenuUtils {
+    + {static} setupLogoutMenu(Fragment, FirebaseManager): void
+  }
+
+  BaseFragment <|-- FragmentStudent
+  BaseFragment <|-- FragmentTutor
+  FragmentStudent *-- StudentSessionAdapter
+  FragmentTutor *-- SessionAdapter
+  FragmentStudent --> MenuUtils
+  FragmentTutor --> MenuUtils
+}
+
+package "Data Layer" {
+
+  class FirebaseManager {
+    - {static} instance: FirebaseManager
+    - auth: FirebaseAuth
+    - firestore: FirebaseFirestore
+    + {static} getInstance(): FirebaseManager
+    + getUserProfile(): Task<Object>
+    + fetchPastSessions(SessionFetchCallback): void
+    + fetchFutureSessions(SessionFetchCallback): void
+    + fetchStudentSessions(String, SessionFetchCallback): void
+    + cancelSession(String, String, StudentStatusCallback): void
+    + rateTutor(String, String, int, StudentStatusCallback): void
+    + searchAvailableSessions(String, SessionFetchCallback): void
+    + requestSession(Session, StudentStatusCallback): void
+    + checkSessionConflict(String, Timestamp, Timestamp, SimpleConflictCallback): void
+  }
+
+  class Session {
+    - sessionId: String
+    - courseCode: String
+    - startTime: Timestamp
+    - endTime: Timestamp
+    - tutor: String
+    - student: String
+    - location: String
+    - autoApprove: boolean
+    - status: String
+    - rating: int
+    + Session(String, boolean, String, Timestamp, Timestamp, String)
+    + getSessionId(): String
+    + setSessionId(String): void
+    + getCourseCode(): String
+    + setCourseCode(String): void
+    + getStartTime(): Timestamp
+    + getEndTime(): Timestamp
+    + getTutor(): String
+    + getStudent(): String
+    + getLocation(): String
+    + isAutoApprove(): boolean
+    + getStatus(): String
+    + getRating(): int
+  }
+
+  class Student {
+    - userId: String
+    - email: String
+    - firstName: String
+    - lastName: String
+    - role: String
+    - enrolledCourses: List<String>
+    - sessionHistory: List<String>
+    + Student(String, String, String, String)
+    + getUserId(): String
+    + getEmail(): String
+    + getFirstName(): String
+    + getLastName(): String
+    + getRole(): String
+    + getEnrolledCourses(): List<String>
+  }
+
+  class Tutor {
+    - userId: String
+    - email: String
+    - firstName: String
+    - lastName: String
+    - role: String
+    - qualifiedCourses: List<String>
+    - availableSlots: List<String>
+    - rating: double
+    - totalRatings: int
+    - sessionHistory: List<String>
+    + Tutor(String, String, String, String)
+    + getUserId(): String
+    + getEmail(): String
+    + getFirstName(): String
+    + getLastName(): String
+    + getRole(): String
+    + getQualifiedCourses(): List<String>
+    + getRating(): double
+    + updateRating(int): void
+  }
+}
+
+package "View Binding" {
+  class FragmentStudentBinding {
+    + recyclerViewSessions: RecyclerView
+    + editTextCourseCode: EditText
+    + buttonSearch: Button
+    + swipeRefresh: SwipeRefreshLayout
+    + {static} inflate(LayoutInflater): FragmentStudentBinding
+    + getRoot(): View
+  }
+
+  class FragmentTutorBinding {
+    + pastSessionsList: RecyclerView
+    + createAvailabilityButton: Button
+    + sessionLabel: RadioGroup
+    + {static} inflate(LayoutInflater): FragmentTutorBinding
+    + getRoot(): View
+  }
+}
+
+package "Interfaces" {
+  interface SessionFetchCallback {
+    + onSessionsFetched(List<Session>): void
+    + onError(Exception): void
+  }
+
+  interface StudentStatusCallback {
+    + onSuccess(): void
+    + onError(Exception): void
+  }
+
+  interface SimpleConflictCallback {
+    + onResult(Exception): void
+  }
+
+  interface SessionClickListener {
+    + onCancelClick(Session): void
+    + onRateClick(Session): void
+    + onViewClick(Session): void
+  }
+
+  interface OnItemClickListener {
+    + onItemClick(Session): void
+    + onEditClick(Session): void
+    + onViewStudentsClick(Session): void
+  }
+
+  interface ConflictCheckCallback {
+    + onConflictCheckComplete(Exception): void
+  }
+}
+
+' Relationships
+FragmentStudent --> FirebaseManager
+FragmentTutor --> FirebaseManager
+FragmentStudent --> FragmentStudentBinding
+FragmentTutor --> FragmentTutorBinding
+FragmentStudent --> Session
+FragmentTutor --> Session
+FirebaseManager --> Student
+FirebaseManager --> Tutor
+FirebaseManager --> Session
+StudentSessionAdapter --> Session
+SessionAdapter --> Session
+
+' Interface implementations
+FirebaseManager ..> SessionFetchCallback
+FirebaseManager ..> StudentStatusCallback
+FirebaseManager ..> SimpleConflictCallback
+StudentSessionAdapter ..> SessionClickListener
+SessionAdapter ..> OnItemClickListener
+FragmentTutor ..> ConflictCheckCallback
+
+' Notes
+note right of FirebaseManager: Singleton pattern\nManages all Firebase operations\nIncludes conflict checking
+note right of Session: Data model for tutoring sessions\nParcelable for intent passing
+note right of FragmentTutor: Contains complete availability\ndialog creation flow
+note top of SimpleConflictCallback: Used for async\nconflict checking
+
+@enduml
