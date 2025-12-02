@@ -26,60 +26,62 @@
     <!-- Rating Numbers -->
     <LinearLayout
         android:id="@+id/rating_container"
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:gravity="center"
         android:orientation="horizontal">
 
+
         <Button
             android:id="@+id/rating_1"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:onClick="onRatingClick"
-
+            android:background="@drawable/round_button"
             android:text="1"
-            android:textColor="@color/white" />
+            android:textColor="@color/black" />
 
         <Button
             android:id="@+id/rating_2"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
-
-            android:onClick="onRatingClick"
+            android:background="@drawable/round_button"
             android:text="2"
-            android:textColor="@color/white" />
+            android:textColor="@color/black" />
 
         <Button
             android:id="@+id/rating_3"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
-
-            android:onClick="onRatingClick"
+            android:background="@drawable/round_button"
             android:text="3"
-            android:textColor="@color/white" />
+            android:textColor="@color/black" />
 
         <Button
             android:id="@+id/rating_4"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
-
-            android:onClick="onRatingClick"
+            android:background="@drawable/round_button"
             android:text="4"
-            android:textColor="@color/white" />
+            android:textColor="@color/black" />
 
         <Button
             android:id="@+id/rating_5"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
-
-            android:onClick="onRatingClick"
+            android:background="@drawable/round_button"
             android:text="5"
-            android:textColor="@color/white" />
+            android:textColor="@color/black" />
 
     </LinearLayout>
 

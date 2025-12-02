@@ -2,10 +2,13 @@ package com.example.otams.data;
 
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.AuthResult;
@@ -419,6 +422,55 @@ public class FirebaseManager {
         }).addOnFailureListener(callback::onError);
     }
 
+    public void checkSessionConflict(String tutorId, Timestamp start, Timestamp end, SimpleConflictCallback callback) {
+        // Basic validation (synchronous part)
+        if (tutorId == null || tutorId.isEmpty()) {
+            callback.onResult(new Exception("Tutor ID is required"));
+            return;
+        }
+
+        if (start == null || end == null) {
+            callback.onResult(new Exception("Start and end times are required"));
+            return;
+        }
+
+        if (end.compareTo(start) <= 0) {
+            callback.onResult(new Exception("End time must be after start time"));
+            return;
+        }
+
+        // Check database for conflicts (asynchronous part)
+        firestore.collection("sessions")
+                .whereEqualTo("tutor", tutorId)
+                .whereEqualTo("isCancelled", false)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (DocumentSnapshot doc : querySnapshot) {
+                        Session existingSession = doc.toObject(Session.class);
+                        if (existingSession != null && hasTimeConflict(
+                                existingSession.getStartTime(),
+                                existingSession.getEndTime(),
+                                start,
+                                end
+                        )) {
+                            callback.onResult(new Exception("Time slot conflicts with existing session"));
+                            return;
+                        }
+                    }
+                    // No conflicts found
+                    callback.onResult(null);
+                })
+                .addOnFailureListener(e -> {
+                    callback.onResult(new Exception("Failed to check for conflicts: " + e.getMessage()));
+                });
+    }
+
+    private boolean hasTimeConflict(Timestamp s1, Timestamp e1, Timestamp s2, Timestamp e2) {
+        // Two time slots conflict if they overlap
+        // s1---e1 and s2---e2 conflict if: s1 < e2 && s2 < e1
+        return s1.compareTo(e2) < 0 && s2.compareTo(e1) < 0;
+    }
+
     public void requestSession(String sessionId, String studentId, StudentStatusCallback callback) {
         firestore.collection("sessions").document(sessionId).get().addOnSuccessListener(documentSnapshot -> {
             Session session = documentSnapshot.toObject(Session.class);
@@ -462,7 +514,6 @@ public class FirebaseManager {
         });
     }
 
-
     public void rateTutor(String tutorId, String studentId, int rating, StudentStatusCallback callback) {
         firestore.collection("users").document(tutorId).get().addOnSuccessListener(documentSnapshot -> {
             Tutor tutor = documentSnapshot.toObject(Tutor.class);
@@ -490,6 +541,23 @@ public class FirebaseManager {
                 callback.onError(new Exception("Tutor not found"));
             }
         }).addOnFailureListener(callback::onError);
+    }
+
+    public interface SimpleConflictCallback {
+        void onResult(@Nullable Exception conflict) ;
+    }
+    public Task<Exception> checkSessionConflict(String uid, Timestamp start, Timestamp end) {
+        TaskCompletionSource<Exception> taskCompletionSource = new TaskCompletionSource<>();
+
+        // Your existing async logic, but complete the Task
+        checkSessionConflict(uid, start, end, new SimpleConflictCallback() {
+            @Override
+            public void onResult(@Nullable Exception conflict) {
+                taskCompletionSource.setResult(conflict);
+            }
+        });
+
+        return taskCompletionSource.getTask();
     }
 
     public interface TutorFetchCallback {

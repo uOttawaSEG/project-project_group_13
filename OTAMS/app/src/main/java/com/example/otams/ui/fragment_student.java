@@ -132,28 +132,62 @@ public class fragment_student extends Fragment {
 
         AlertDialog dialog = builder.create();
 
-        // Find views
-        TextView tutorNameView = dialogView.findViewById(R.id.tutor_name);
-        Button cancelButton = dialogView.findViewById(R.id.cancel_button);
+        // Get button references
+        Button rating1 = dialogView.findViewById(R.id.rating_1);
+        Button rating2 = dialogView.findViewById(R.id.rating_2);
+        Button rating3 = dialogView.findViewById(R.id.rating_3);
+        Button rating4 = dialogView.findViewById(R.id.rating_4);
+        Button rating5 = dialogView.findViewById(R.id.rating_5);
         Button submitButton = dialogView.findViewById(R.id.submit_button);
+        Button cancelButton = dialogView.findViewById(R.id.cancel_button);
 
-        // Load tutor name
-        tutorNameView.setText("Tutor: Loading...");
-        firebaseManager.getTutorNameTask(tutorId).addOnSuccessListener(tutorName -> {
-            tutorNameView.setText("Tutor: " + tutorName);
-        }).addOnFailureListener(e -> {
-            tutorNameView.setText("Tutor: Error");
-        });
+        final int[] selectedRating = {0};
 
-        // Set button click listeners
+        // Set click listeners
+        rating1.setOnClickListener(v -> handleRatingSelection(1, dialogView, selectedRating, submitButton));
+        rating2.setOnClickListener(v -> handleRatingSelection(2, dialogView, selectedRating, submitButton));
+        rating3.setOnClickListener(v -> handleRatingSelection(3, dialogView, selectedRating, submitButton));
+        rating4.setOnClickListener(v -> handleRatingSelection(4, dialogView, selectedRating, submitButton));
+        rating5.setOnClickListener(v -> handleRatingSelection(5, dialogView, selectedRating, submitButton));
+
         cancelButton.setOnClickListener(v -> dialog.dismiss());
-
         submitButton.setOnClickListener(v -> {
-            // This won't work without implementing rating selection
-            Toast.makeText(requireContext(), "Select a rating first", Toast.LENGTH_SHORT).show();
+            if (selectedRating[0] > 0) {
+                submitRating(tutorId, selectedRating[0]);
+                dialog.dismiss();
+            } else {
+                Toast.makeText(requireContext(), "Please select a rating", Toast.LENGTH_SHORT).show();
+            }
         });
 
         dialog.show();
+    }
+
+    private void handleRatingSelection(int rating, View dialogView, int[] selectedRating, Button submitButton) {
+        selectedRating[0] = rating;
+
+        // Update selected rating display
+        TextView selectedRatingView = dialogView.findViewById(R.id.selected_rating);
+        selectedRatingView.setText("Selected: " + rating + "/5");
+        selectedRatingView.setVisibility(View.VISIBLE);
+
+        // Enable submit button
+        submitButton.setEnabled(true);
+
+        // Optional: Update button appearances
+        updateSelectedRatingButton(dialogView, rating);
+    }
+
+    private void updateSelectedRatingButton(View dialogView, int selectedRating) {
+        // Reset all buttons to unselected state
+        int[] buttonIds = {R.id.rating_1, R.id.rating_2, R.id.rating_3, R.id.rating_4, R.id.rating_5};
+
+        for (int i = 0; i < buttonIds.length; i++) {
+            Button button = dialogView.findViewById(buttonIds[i]);
+            int ratingValue = i + 1;
+
+
+        }
     }
 
     private void submitRating(String tutorId, int rating) {
@@ -177,6 +211,7 @@ public class fragment_student extends Fragment {
         NavController navController = Navigation.findNavController(requireView());
         navController.navigate(R.id.action_fragment_student_to_fragment_student_expanded);
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {

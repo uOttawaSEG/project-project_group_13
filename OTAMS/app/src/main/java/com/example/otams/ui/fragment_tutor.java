@@ -2,6 +2,7 @@ package com.example.otams.ui;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
 import android.os.Bundle;
@@ -44,8 +45,8 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class fragment_tutor extends Fragment {
-    private ArrayList<Session> future_sessions = new ArrayList<>();
-    private ArrayList<Session> past_sessions = new ArrayList<>();
+    private final ArrayList<Session> future_sessions = new ArrayList<>();
+    private final ArrayList<Session> past_sessions = new ArrayList<>();
     private FirebaseManager firebaseManager;
     private FragmentTutorBinding binding;
     private SessionAdapter adapter;
@@ -397,10 +398,9 @@ public class fragment_tutor extends Fragment {
         EditText locationInput = dialogView.findViewById(R.id.locationInput);
         CheckBox autoApproveCheck = dialogView.findViewById(R.id.autoApproveCheck);
 
-        //disable cancel chkeckbox
+        // Disable/hide cancel checkbox
         CheckBox cancelSessionCheck = dialogView.findViewById(R.id.cancelSessionCheck);
         cancelSessionCheck.setVisibility(View.GONE);
-
 
         dateInput.setInputType(InputType.TYPE_NULL);
         startTimeInput.setInputType(InputType.TYPE_NULL);
@@ -425,67 +425,181 @@ public class fragment_tutor extends Fragment {
         startTimeInput.setOnClickListener(v -> showHalfHourPicker(startTimeInput));
         endTimeInput.setOnClickListener(v -> showHalfHourPicker(endTimeInput));
 
-        builder.setPositiveButton("Create", (dialog, which) -> {
-            String date = dateInput.getText().toString().trim();
-            String start = startTimeInput.getText().toString().trim();
-            String end = endTimeInput.getText().toString().trim();
-            String course = subjectInput.getText().toString().trim();
-            String location = locationInput.getText().toString().trim();
-            boolean autoApprove = autoApproveCheck.isChecked();
+        AlertDialog dialog = builder.create();
 
-            if (date.isEmpty() || start.isEmpty() || end.isEmpty()) {
-                Toast.makeText(requireContext(), "All fields are required.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (end.compareTo(start) <= 0) {
-                Toast.makeText(requireContext(), "End time must be after start time.", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        // Set up custom positive button handling to prevent auto-dismiss
+        builder.setPositiveButton("Create", null);
+        builder.setNegativeButton("Cancel", null);
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+        dialog = builder.create();
 
-            try {
-                Date startDateTime = sdf.parse(date + " " + start);
-                Date endDateTime = sdf.parse(date + " " + end);
+        AlertDialog finalDialog = dialog;
+        dialog.setOnShowListener(dialogInterface -> {
+            Button positiveButton = finalDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            Button negativeButton = finalDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
 
-                Timestamp startTimestamp = new Timestamp(startDateTime);
-                Timestamp endTimestamp = new Timestamp(endDateTime);
+            positiveButton.setOnClickListener(view -> {
+                String date = dateInput.getText().toString().trim();
+                String start = startTimeInput.getText().toString().trim();
+                String end = endTimeInput.getText().toString().trim();
+                String course = subjectInput.getText().toString().trim();
+                String location = locationInput.getText().toString().trim();
+                boolean autoApprove = autoApproveCheck.isChecked();
 
-                String uid = firebaseManager.getCurrentUser().getUid();
+                // Basic validation
+                if (date.isEmpty() || start.isEmpty() || end.isEmpty() ||
+                        course.isEmpty() || location.isEmpty()) {
+                    Toast.makeText(requireContext(), "All fields are required.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                firebaseManager.getUserProfile().addOnSuccessListener(profileObj -> {
-                    if (profileObj instanceof Tutor) {
-                        Session newSession = new Session(course, autoApprove, location, startTimestamp, endTimestamp, uid);
+                if (end.compareTo(start) <= 0) {
+                    Toast.makeText(requireContext(), "End time must be after start time.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                        firebaseManager.getFirestore().collection("sessions").add(newSession).addOnSuccessListener(documentReference -> {
-                            newSession.setSessionId(documentReference.getId());
+                try {
+                    // Parse dates
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+                    Date startDateTime = sdf.parse(date + " " + start);
+                    Date endDateTime = sdf.parse(date + " " + end);
 
-                            // Update the session document itself
-                            documentReference.update("sessionId", documentReference.getId()).addOnSuccessListener(aVoid -> {
-                                Toast.makeText(requireContext(), "Availability slot created successfully", Toast.LENGTH_SHORT).show();
-                                // Refresh the sessions list
-                                loadSessions();
-                            });
-                        }).addOnFailureListener(e -> {
-                            e.printStackTrace();
-                            Toast.makeText(requireContext(), "Failed to create availability slot", Toast.LENGTH_SHORT).show();
-                        });
+                    // Validate duration (minimum 30 minutes, maximum 4 hours)
+                    long duration = endDateTime.getTime() - startDateTime.getTime();
+                    long minDuration = 30 * 60 * 1000; // 30 minutes
+                    long maxDuration = 4 * 60 * 60 * 1000; // 4 hours
+
+                    if (duration < minDuration) {
+                        Toast.makeText(requireContext(), "Minimum slot duration is 30 minutes", Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                }).addOnFailureListener(e -> {
-                    Log.d("fragment_tutor", "showCreateAvailabilityDialog: " + e.getMessage());
-                    e.printStackTrace();
-                    Toast.makeText(requireContext(), "Error getting user profile", Toast.LENGTH_SHORT).show();
-                });
 
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(requireContext(), "Invalid date or time format", Toast.LENGTH_SHORT).show();
-            }
+                    if (duration > maxDuration) {
+                        Toast.makeText(requireContext(), "Maximum slot duration is 4 hours", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Convert to timestamps
+                    Timestamp startTimestamp = new Timestamp(startDateTime);
+                    Timestamp endTimestamp = new Timestamp(endDateTime);
+
+                    // Disable buttons while checking
+                    positiveButton.setEnabled(false);
+                    negativeButton.setEnabled(false);
+                    positiveButton.setText("Checking conflicts...");
+
+                    // Check for conflicts first
+                    checkForConflictsAndCreateSlot(
+                            startTimestamp,
+                            endTimestamp,
+                            course,
+                            autoApprove,
+                            location,
+                            finalDialog,
+                            positiveButton,
+                            negativeButton
+                    );
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(requireContext(), "Invalid date or time format", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
+        dialog.show();
     }
+
+    private void checkForConflictsAndCreateSlot(Timestamp start, Timestamp end, String course,
+                                                boolean autoApprove, String location,
+                                                AlertDialog dialog, Button positiveButton,
+                                                Button negativeButton) {
+
+        String uid = firebaseManager.getCurrentUser().getUid();
+
+        // Check for conflicts
+        firebaseManager.checkSessionConflict(uid, start, end, new FirebaseManager.SimpleConflictCallback() {
+            @Override
+            public void onResult(@Nullable Exception conflict) {
+                if (conflict != null) {
+                    // Conflict found - show error and re-enable buttons
+                    Toast.makeText(requireContext(), conflict.getMessage(), Toast.LENGTH_SHORT).show();
+                    positiveButton.setEnabled(true);
+                    negativeButton.setEnabled(true);
+                    positiveButton.setText("Create");
+                    return;
+                }
+
+                // No conflicts - get user profile and create session
+                firebaseManager.getUserProfile().addOnSuccessListener(profileObj -> {
+                            if (profileObj instanceof Tutor) {
+                                // Create the session object
+                                Session newSession = new Session(course, autoApprove, location, start, end, uid);
+
+                                // Add to Firestore
+                                firebaseManager.getFirestore().collection("sessions")
+                                        .add(newSession)
+                                        .addOnSuccessListener(documentReference -> {
+                                            // Set the session ID
+                                            newSession.setSessionId(documentReference.getId());
+
+                                            // Update the document with the session ID
+                                            documentReference.update("sessionId", documentReference.getId())
+                                                    .addOnSuccessListener(aVoid -> {
+                                                        // Success - dismiss dialog and refresh
+                                                        dialog.dismiss();
+                                                        Toast.makeText(requireContext(),
+                                                                "Availability slot created successfully",
+                                                                Toast.LENGTH_SHORT).show();
+                                                        loadSessions();
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        // Failed to update session ID
+                                                        e.printStackTrace();
+                                                        positiveButton.setEnabled(true);
+                                                        negativeButton.setEnabled(true);
+                                                        positiveButton.setText("Create");
+                                                        Toast.makeText(requireContext(),
+                                                                "Failed to update session ID",
+                                                                Toast.LENGTH_SHORT).show();
+                                                    });
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            // Failed to add session
+                                            e.printStackTrace();
+                                            positiveButton.setEnabled(true);
+                                            negativeButton.setEnabled(true);
+                                            positiveButton.setText("Create");
+                                            Toast.makeText(requireContext(),
+                                                    "Failed to create availability slot",
+                                                    Toast.LENGTH_SHORT).show();
+                                        });
+                            } else {
+                                // User is not a tutor
+                                positiveButton.setEnabled(true);
+                                negativeButton.setEnabled(true);
+                                positiveButton.setText("Create");
+                                Toast.makeText(requireContext(),
+                                        "Only tutors can create availability slots",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            // Failed to get user profile
+                            Log.d("fragment_tutor", "Failed to get user profile: " + e.getMessage());
+                            e.printStackTrace();
+                            positiveButton.setEnabled(true);
+                            negativeButton.setEnabled(true);
+                            positiveButton.setText("Create");
+                            Toast.makeText(requireContext(),
+                                    "Error getting user profile",
+                                    Toast.LENGTH_SHORT).show();
+                        });
+            }
+        });
+    }
+
+
 
     // Adapter class
     public static class SessionAdapter extends RecyclerView.Adapter<SessionAdapter.SessionViewHolder> {
