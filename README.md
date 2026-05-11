@@ -44,4 +44,6 @@
 6. Mani Masteali, 300428049
 
 
-
+<p align="center">
+  <sub><sup>Made with ❤️ using ChatGPT, Gemini and caffeine ☕</sup></sub>
+</p>
